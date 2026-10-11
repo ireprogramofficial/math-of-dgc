@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+Thumbs.db
+
+# Reference screenshots of a third party's Instagram video. Visual reference only:
+# never commit or publish them (copyright, and they show account UI).
+example-river-flow/
+
+# Claude Code local files
+.claude/settings.local.json

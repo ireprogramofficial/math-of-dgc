@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>The Math of DGC</title>
+    <meta name="description" content="Interactive visualizations of dynamical systems and open-loop trajectory optimization: a boat on a river." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+        <!-- 1 · Title -->
+        <section class="title-slide" data-prevent-swipe>
+          <div class="river-widget" data-widget="hero"></div>
+          <div class="title-card">
+            <div class="kicker">Working session</div>
+            <h1>The math of DGC</h1>
+            <p>Dynamics, control, and trajectory optimization, with one running example: planning an open-loop schedule for a boat on a river.</p>
+          </div>
+        </section>
+
+        <!-- 2 · A family of rivers -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">The running example</div>
+            <h2>A river is a vector field</h2>
+            <p class="lede">At every point the water has a velocity. Color shows speed; streaks show direction.</p>
+          </div>
+          <div class="slide-body" style="grid-template-columns: 1fr;">
+            <div class="river-widget gallery" data-widget="gallery"></div>
+          </div>
+        </section>
+
+
+        <!-- 3 · Open-loop control-affine system -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">Part 1 · Dynamics and control</div>
+            <h2>A boat is a control-affine system</h2>
+            <p class="lede">Paint a thrust schedule on the timeline. The boat follows it blindly: that is what open loop means.</p>
+          </div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="schedule"></div>
+            <div class="side">
+              <div class="eq-card">$$\dot{x} \;=\; f(x) \;+\; G\,u$$</div>
+              <ul class="eq-list">
+                <li><b>State</b> \(x=(p,v)\in\mathbb{R}^4\): position and velocity of the boat.</li>
+                <li><b>Drift</b> \(f(x)=\big(v,\,-c\,(v-w(p))\big)\): what the river does with no control. \(w(p)\) is the water velocity <span class="swatch" style="background:#1f6fb2"></span>.</li>
+                <li><b>Input</b> \(u=(u_N,u_E,u_S,u_W)\in[0,1]^4\): four thrusters, none can pull backward.</li>
+                <li><b>Control matrix</b> \(G\): constant here. Thrust adds acceleration \(G u\) <span class="swatch" style="background:#d8572a"></span>.</li>
+                <li><b>Open loop</b>: \(u\) depends on time only, fixed in advance. It never looks at \(x\).</li>
+              </ul>
+              <p>Switch off a thruster and notice how the boat's reach changes.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4 · Open-loop trajectory optimization -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">Part 2 · Trajectory optimization</div>
+            <h2>Find the best schedule, not just a schedule</h2>
+            <p class="lede">Drag the target ring, disable thrusters, then press Solve. The plan is computed live in your browser.</p>
+          </div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="optimize"></div>
+            <div class="side">
+              <div class="eq-card">
+                $$\min_{u(\cdot)}\;\; \underbrace{\tfrac12\|x(T)-x^\star\|_Q^2}_{\text{terminal cost}} + \underbrace{\int_0^T \tfrac{\rho}{2}\|u\|^2\,dt}_{\text{effort}}$$
+                $$\text{s.t.}\quad \dot x = f(x)+Gu,\;\; x(0)=x_0,\;\; 0\le u\le 1$$
+              </div>
+              <ul class="eq-list">
+                <li><b>Decision</b>: the whole schedule \(u(t)\), at once.</li>
+                <li><b>Objective</b>: arrive near \(x^\star\) (target) at time \(T\) while spending little thrust.</li>
+                <li><b>Constraints</b>: the dynamics, a fixed start, and non-negative bounded thrust. Staying off the banks is a soft penalty.</li>
+                <li><b>Deterministic</b>: no noise, so the plan is exact and needs no feedback.</li>
+              </ul>
+              <p>The dotted line is where the river alone would carry the boat.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
