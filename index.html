@@ -58,13 +58,14 @@
               <div class="defn">
                 <p class="defn-lead">A <b>control system</b> is a dynamical system \((X, f)\) with a control \((U, G)\) added:</p>
                 <dl>
-                  <dt>Control space</dt><dd>\(U \subseteq \mathbb{R}^m\), with control schedules \(\mathcal{U} = \{\,u : [0,T] \to U\,\}\)</dd>
-                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x) + G(x)\,u(t)\), where \(G : X \to \mathbb{R}^{n \times m}\) is the input map</dd>
+                  <dt>Control space</dt><dd>\(U \subseteq \mathbb{R}^m\)</dd>
+                  <dt>Control schedule</dt><dd>\(u \in \mathcal{U} = \{\,u : [0,T] \to U\,\}\)</dd>
+                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x) + G(x)\,u(t)\),<br>where \(G : X \to \mathbb{R}^{n \times m}\) is the input map</dd>
                 </dl>
               </div>
               <div class="defn element">
                 <dl>
-                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0, u)\), one for each \(u \in \mathcal{U}\)</dd>
+                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0, u)\),<br>one for each \(u \in \mathcal{U}\)</dd>
                 </dl>
               </div>
             </div>
@@ -117,13 +118,6 @@
             <div class="river-widget" data-widget="schedule"></div>
             <div class="side">
               <div class="eq-card">$$\dot{x} \;=\; f(x) \;+\; G\,u$$</div>
-              <ul class="eq-list">
-                <li><b>State</b> \(x=(p,v)\in\mathbb{R}^4\): position and velocity of the boat.</li>
-                <li><b>Drift</b> \(f(x)=\big(v,\,-c\,(v-w(p))\big)\): what the river does with no control. \(w(p)\) is the water velocity <span class="swatch" style="background:#1f6fb2"></span>.</li>
-                <li><b>Input</b> \(u=(u_N,u_E,u_S,u_W)\in[0,1]^4\): four thrusters, none can pull backward.</li>
-                <li><b>Control matrix</b> \(G\): constant here. Thrust adds acceleration \(G u\) <span class="swatch" style="background:#d8572a"></span>.</li>
-                <li><b>Open loop</b>: \(u\) depends on time only, fixed in advance. It never looks at \(x\).</li>
-              </ul>
               <p>Switch off a thruster and notice how the boat's reach changes.</p>
             </div>
           </div>

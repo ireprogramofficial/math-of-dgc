@@ -20,7 +20,7 @@ export function createBoatWidget(el, cfg) {
   const timelineWrap = h('div', { class: 'timeline-wrap' });
   const readout = h('span', { class: 'readout' });
   const note = h('span', { class: 'readout', style: { color: COLORS.bad, fontWeight: 700 } });
-  const playBtn = h('button', { type: 'button' }, '▶ Play');
+  const playBtn = h('button', { type: 'button', class: 'map-action map-play' }, '▶ Play');
   const solveBtn = cfg.solve ? h('button', { type: 'button', class: 'primary' }, 'Solve') : null;
 
   const scene = new BoatScene(stage, timelineWrap, {
@@ -57,7 +57,6 @@ export function createBoatWidget(el, cfg) {
       return b;
     }),
     solveBtn,
-    playBtn,
     targetChips,
   );
   const info = h('div', { class: 'boat-toolbar info' },
@@ -81,7 +80,8 @@ export function createBoatWidget(el, cfg) {
       update();
     },
   });
-  el.append(stage, h('div', {}, toolbar, timelineWrap), mapControls.el);
+  stage.append(h('div', { class: 'map-actions' }, playBtn));
+  el.append(stage, h('div', {}, timelineWrap, toolbar), mapControls.el);
 
   function update() {
     const s = scene.stats();

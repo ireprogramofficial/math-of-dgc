@@ -92,7 +92,7 @@
 
 /* ---------- boat widgets ---------- */
 .boat-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 0.6em; }
-.toolbars { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+.toolbars { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .boat-toolbar.info { gap: 6px 18px; }
 .boat-toolbar .readout { font-size: 1em; }
 .boat-toolbar label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
@@ -157,3 +157,5 @@
 /* small actions on a map (top-right) */
 .map-actions { position: absolute; right: 10px; top: 10px; z-index: 3; display: flex; gap: 6px; }
 .reveal .map-action { font-size: 13px; padding: 3px 10px; background: rgba(255,255,255,0.92); box-shadow: 0 1px 5px rgba(20,40,70,0.15); }
+
+.reveal .map-action.map-play { font-size: 16px; font-weight: 700; padding: 5px 16px; background: var(--ink); color: #fff; border-color: var(--ink); }

@@ -2,7 +2,7 @@
 import { DIRS } from '../control/boat.js';
 import { COLORS } from './draw.js';
 import { createMapControls } from './mapControls.js';
-import { SteerScene, MANUAL_HOLD_MS } from './steerScene.js';
+import { SteerScene } from './steerScene.js';
 import { h } from './ui.js';
 
 const PAD_KEYS = ['W', 'D', 'S', 'A']; // N, E, S, W
@@ -29,10 +29,7 @@ export function create(el) {
     { color: COLORS.water, text: 'drift', tex: 'f(x)' },
     { color: COLORS.thrust, text: 'thrust', tex: 'G(x)\,u' },
   ]);
-  const info = h('div', { class: 'boat-toolbar info' },
-    h('span', { class: 'readout' }, `Steer yourself: hold W A S D or the pad. The autopilot resumes after ${MANUAL_HOLD_MS / 1000} s without input.`),
-  );
-  el.append(stage, info, controls.el);
+  el.append(stage, controls.el);
 
   let lastMode = '', lastText = '';
   function update({ mode, secondsLeft, u, holding }) {
