@@ -168,7 +168,64 @@ const fork = {
   ],
 };
 
-// ---- 7. branching delta: one source basin -> five terminal basins -----------------------
+// ---- 7. triangle of gyres: three basins at the corners of an equilateral triangle ---------
+// Wide, gently meandering channels join every pair of basins (including the two terminal ones), so the boat
+// can travel between any two basins directly. Water enters at the source basin and leaves at the other two.
+const TRI = (() => {
+  const s = 640, r = 110, cx = 800, cy = 450;          // side length, basin radius, centroid
+  const R = s / Math.sqrt(3);                           // centroid -> vertex
+  const at = (deg) => ({ x: cx + R * Math.cos((deg * Math.PI) / 180), y: cy + R * Math.sin((deg * Math.PI) / 180), r });
+  return { s, r, cx, cy, src: at(180), b1: at(60), b2: at(-60) };
+})();
+/** Points from a to b with a gentle S-shaped meander of amplitude `amp` (meters) perpendicular to the line. */
+function meanderBetween(a, b, amp, n = 8) {
+  const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L, pts = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, o = amp * Math.sin(2 * Math.PI * t);
+    pts.push([a.x + dx * t + nx * o, a.y + dy * t + ny * o]);
+  }
+  return pts;
+}
+/** A patch on a basin's rim, on the side facing away from the triangle's centroid. */
+const rimPatch = (b, radius) => {
+  const ux = b.x - TRI.cx, uy = b.y - TRI.cy, m = Math.hypot(ux, uy);
+  return disc(b.x + ((b.r - 14) * ux) / m, b.y + ((b.r - 14) * uy) / m, radius);
+};
+const triangle = {
+  id: 'triangle',
+  name: 'Triangle of gyres',
+  blurb: 'Three basins at the corners of an equilateral triangle, each with a gyre, joined pairwise by wide channels.',
+  complexity: 7,
+  water: union(
+    ...[TRI.src, TRI.b1, TRI.b2].map((b) => disc(b.x, b.y, b.r)),
+    channel(meanderBetween(TRI.src, TRI.b1, 28), 130, 6),
+    channel(meanderBetween(TRI.src, TRI.b2, -28), 130, 6),
+    channel(meanderBetween(TRI.b1, TRI.b2, 28), 130, 6),
+  ),
+  sources: [rimPatch(TRI.src, 24)],
+  sinks: [rimPatch(TRI.b1, 22), rimPatch(TRI.b2, 22)],
+  swirls: [
+    { x: TRI.src.x, y: TRI.src.y, R: TRI.r, r0: 60, V: 0.9, dir: 1 },
+    { x: TRI.b1.x, y: TRI.b1.y, R: TRI.r, r0: 55, V: 0.6, dir: -1 },
+    { x: TRI.b2.x, y: TRI.b2.y, R: TRI.r, r0: 55, V: 0.6, dir: 1 },
+  ],
+  speedRef: 1.1,
+  boat: { start: [TRI.src.x, TRI.src.y], target: [TRI.b1.x, TRI.b1.y], horizon: 560 },
+  targets: [{ name: 'Basin 1', x: TRI.b1.x, y: TRI.b1.y }, { name: 'Basin 2', x: TRI.b2.x, y: TRI.b2.y }],
+  views: [
+    { name: 'Overview', cx: (TRI.src.x - TRI.r + TRI.b1.x + TRI.r) / 2, cy: TRI.cy, span: TRI.b1.x - TRI.src.x + 2 * TRI.r + 120, spanY: 2 * (TRI.s / 2 + TRI.r) + 30 },
+    { name: 'Source gyre', cx: TRI.src.x, cy: TRI.src.y, span: 340 },
+    { name: 'Basin 1 gyre', cx: TRI.b1.x, cy: TRI.b1.y, span: 340 },
+    { name: 'The link', cx: TRI.b1.x, cy: TRI.cy, span: 460 },
+  ],
+  labels: [
+    { x: TRI.src.x, y: TRI.src.y, text: 'source', size: 16 },
+    { x: TRI.b1.x, y: TRI.b1.y, text: 'basin 1', size: 15 },
+    { x: TRI.b2.x, y: TRI.b2.y, text: 'basin 2', size: 15 },
+  ],
+};
+
+// ---- 8. branching delta: one source basin -> five terminal basins -----------------------
 const TERMINALS = [110, 280, 450, 620, 790].map((y) => ({ x: 1420, y, r: 75 }));
 const deltaPaths = [
   channel([[140, 450], [300, 450], [430, 450], [520, 450]], [100, 92, 92, 92], 8),
@@ -187,7 +244,7 @@ const delta = {
   id: 'delta',
   name: 'Branching delta',
   blurb: 'One source basin splits through a tree of channels into five terminal basins.',
-  complexity: 7,
+  complexity: 8,
   water: union(disc(140, 450, 110), ...deltaPaths, ...TERMINALS.map((t) => disc(t.x, t.y, t.r))),
   sources: [disc(52, 450, 22)],
   sinks: TERMINALS.map((t) => disc(t.x + t.r - 12, t.y, 20)),
@@ -205,7 +262,7 @@ const delta = {
   ],
 };
 
-export const SCENARIOS = [straight, meander, lake, confluence, gyre, fork, delta];
+export const SCENARIOS = [straight, meander, lake, confluence, gyre, fork, triangle, delta];
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s]));
 export const getScenario = (id) => {
   const s = SCENARIO_BY_ID[id];

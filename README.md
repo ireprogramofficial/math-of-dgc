@@ -37,8 +37,9 @@ rest. On the map slides: **drag** to pan, **scroll** to zoom, **double-click** t
 Every interactive slide shares one control bar (`src/widgets/mapControls.js`): **River**, **Color** (blues by default; rainbow, viridis,
 plasma, turbo, or none) and **Camera** (the river's scripted views, with *Overview* as home). Pan and zoom are always available on the map.
 
-The rivers, simplest to most complex: straight channel, meandering channel, river into a lake, confluence, gyre, fork with gyres (one source basin,
-two meandering channels, two terminal basins, a vortex in each basin), and a branching delta (one source basin, five terminal basins).
+The eight rivers, simplest to most complex: straight channel, meandering channel, river into a lake, confluence, gyre, fork with gyres (one source basin,
+two meandering channels, two terminal basins, a vortex in each basin), triangle of gyres (three basins at the corners of an equilateral
+triangle, joined pairwise by wide channels, so travel between any two basins is direct), and a branching delta (one source basin, five terminal basins).
 
 Definitions on slides 2 and 3 follow `example-river-flow/definitions-for-trajectory-optimization.pptx` (git-ignored, iReprogram-internal; only the two
 textbook-generic definitions are used on the slides).
