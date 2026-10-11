@@ -29,15 +29,19 @@ rest. On the map slides: **drag** to pan, **scroll** to zoom, **double-click** t
 | Slide | Widget | What it shows |
 |---|---|---|
 | 1 | `hero` | Title over a slowly drifting view of the two-basin fork with gyres |
-| 2 | `gallery` | Seven synthetic rivers, from a straight channel to a delta with five terminal basins. Shared controls for river, colormap and camera |
-| 3 | `schedule` | The components of an open-loop control-affine system, played out on the boat. Paint a thrust schedule, switch thrusters off, press play |
-| 4 | `optimize` | The open-loop trajectory optimization problem, solved live. Drag the target, disable thrusters, watch the plan change |
+| 2 | `gallery` | **Definition: a dynamical system** (state space, drift, trajectory) beside the river as a vector field. Defaults to the meandering channel |
+| 3 | `control` | **Definition: a control system.** A boat steers itself between points (feedback autopilot, A* path plus pure pursuit) and pauses at each arrival. Hold **W A S D** or the on-screen pad to take over; after 7 s without input the autopilot resumes. No target or schedule is shown |
+| 4 | `schedule` | A control schedule: paint thrust on a timeline, switch thrusters off, press play (open loop) |
+| 5 | `optimize` | The open-loop trajectory optimization problem, solved live. Drag the target, disable thrusters, watch the plan change |
 
 Every interactive slide shares one control bar (`src/widgets/mapControls.js`): **River**, **Color** (blues by default; rainbow, viridis,
 plasma, turbo, or none) and **Camera** (the river's scripted views, with *Overview* as home). Pan and zoom are always available on the map.
 
 The rivers, simplest to most complex: straight channel, meandering channel, river into a lake, confluence, gyre, fork with gyres (one source basin,
 two meandering channels, two terminal basins, a vortex in each basin), and a branching delta (one source basin, five terminal basins).
+
+Definitions on slides 2 and 3 follow `example-river-flow/definitions-for-trajectory-optimization.pptx` (git-ignored, iReprogram-internal; only the two
+textbook-generic definitions are used on the slides).
 
 ### The model
 
@@ -55,6 +59,13 @@ linear-time-varying system linearized about a trajectory. That is the bridge to 
 
 The optimizer minimizes terminal miss + effort + a soft bank penalty with accelerated projected gradient
 (FISTA, backtracking, adaptive restart), using an exact adjoint gradient. It converges in 0.1 to 1 s in the browser.
+
+### The autopilot (`src/control/autopilot.js`)
+
+Picks a destination far from the boat, plans a path over the free water with A* (preferring mid-channel), and follows it with pure pursuit that only aims at
+points visible over open water (so it cannot cut corners across land). A velocity-tracking law `a = kv (v_des - v) + c (v - w)` turns that into thruster
+fractions, so the boat also holds station against the current while it pauses. It detects stalls and re-plans. `LiveBoat` enforces the banks as hard
+limits so manual steering cannot beach the boat.
 
 ### The flow engine (`src/river/`)
 

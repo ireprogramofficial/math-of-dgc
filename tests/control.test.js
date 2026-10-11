@@ -60,8 +60,7 @@ describe('optimizer', () => {
       const e = 1e-4, Up = Float64Array.from(U), Um = Float64Array.from(U);
       Up[i] += e; Um[i] -= e;
       const fd = (evaluate(problem, Up).J - evaluate(problem, Um).J) / (2 * e);
-      expect(r.grad[i]).toBeCloseTo(fd, 3 - Math.floor(Math.log10(Math.abs(fd) + 1e-9)) > 4 ? 0 : 2);
-      expect(Math.abs(r.grad[i] - fd)).toBeLessThan(2e-3 * Math.max(1, Math.abs(fd)));
+      expect(Math.abs(r.grad[i] - fd)).toBeLessThan(1e-3 * Math.max(1, Math.abs(fd))); // relative agreement
     }
   });
 

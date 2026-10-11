@@ -6,25 +6,10 @@ import { evaluate, makeProblem, project, TrajectoryOptimizer } from '../control/
 import { Timeline } from '../control/timeline.js';
 import { DEFAULT_COLORMAP } from '../river/colormaps.js';
 import { RiverView } from '../river/view.js';
+import { arrow, boatGlyph, COLORS } from './draw.js';
 
-export const COLORS = { thrust: '#d8572a', water: '#1f6fb2', ink: '#16283d', bad: '#c0392b', good: '#2e8b57' };
+export { COLORS };
 const N_INTERVALS = 60, SUBSTEPS = 5;
-
-function arrow(ctx, x, y, dx, dy, color, width = 3, head = 8) {
-  const len = Math.hypot(dx, dy);
-  if (len < 3) return;
-  const ux = dx / len, uy = dy / len, hx = x + dx, hy = y + dy;
-  const draw = (w, col) => {
-    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(hx - ux * head * 0.6, hy - uy * head * 0.6); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(hx, hy);
-    ctx.lineTo(hx - ux * head - uy * head * 0.55, hy - uy * head + ux * head * 0.55);
-    ctx.lineTo(hx - ux * head + uy * head * 0.55, hy - uy * head - ux * head * 0.55);
-    ctx.closePath(); ctx.fill();
-  };
-  draw(width + 3, 'rgba(255,255,255,0.9)');
-  draw(width, color);
-}
 
 export class BoatScene {
   /**
@@ -286,15 +271,7 @@ export class BoatScene {
   }
 
   _boat(ctx, x, y, ang, speed) {
-    ctx.save();
-    ctx.translate(x, y);
     if (speed > 0.15) this._lastAng = ang; // `ang` is already a screen-space angle (y down)
-    ctx.rotate(this._lastAng ?? 0);
-    ctx.beginPath();
-    ctx.moveTo(13, 0); ctx.quadraticCurveTo(5, 6.5, -10, 6); ctx.lineTo(-10, -6); ctx.quadraticCurveTo(5, -6.5, 13, 0); ctx.closePath();
-    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = COLORS.ink; ctx.lineWidth = 2;
-    ctx.shadowColor = 'rgba(20,40,70,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
-    ctx.fill(); ctx.shadowColor = 'transparent'; ctx.stroke();
-    ctx.restore();
+    boatGlyph(ctx, x, y, this._lastAng ?? 0);
   }
 }

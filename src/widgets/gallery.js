@@ -6,7 +6,7 @@ import { h } from './ui.js';
 export function create(el) {
   el.classList.add('map-widget', 'gallery');
   const stage = h('div', { class: 'stage' });
-  const view = new RiverView(stage, { scenario: 'delta' });
+  const view = new RiverView(stage, { scenario: 'meander' });
   const controls = createMapControls(view, { caption: true });
   el.append(h('div', { class: 'map-top' }, controls.el, controls.caption), stage);
   view.ready.then(() => controls.refresh());

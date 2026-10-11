@@ -34,23 +34,23 @@ const straight = {
 };
 
 // ---- 2. meandering channel ---------------------------------------------------------------
-const meanderY = (x) => 450 + 215 * Math.sin((2 * Math.PI * x) / 1000);
+const meanderY = (x) => 450 + 140 * Math.sin((2 * Math.PI * x) / 1300);
 const meanderPts = [];
-for (let x = -100; x <= 1700; x += 60) meanderPts.push([x, meanderY(x)]);
+for (let x = -100; x <= 1700; x += 50) meanderPts.push([x, meanderY(x)]);
 const meander = {
   id: 'meander',
   name: 'Meandering channel',
   blurb: 'The drift now curves, so the best route is not a straight line.',
   complexity: 2,
-  water: channel(meanderPts, 110, 4),
+  water: channel(meanderPts, 150, 4),
   sources: [rect(-200, 0, 20, 900)],
   sinks: [rect(1580, 0, 1800, 900)],
   speedRef: 1.5,
   boat: { start: [120, meanderY(120)], target: [1330, meanderY(1330)], horizon: 420 },
   views: [
-    { name: 'Overview', cx: 800, cy: 450, span: 1640, spanY: 640 },
-    { name: 'First bend', cx: 300, cy: 650, span: 380 },
-    { name: 'Second bend', cx: 770, cy: 270, span: 380 },
+    { name: 'Overview', cx: 800, cy: 450, span: 1640, spanY: 520 },
+    { name: 'First bend', cx: 325, cy: 570, span: 420 },
+    { name: 'Second bend', cx: 975, cy: 330, span: 420 },
   ],
   labels: [],
 };
@@ -148,7 +148,7 @@ const fork = {
   sinks: FORK.basins.map((b) => disc(b.x + b.r - 14, b.y, 22)),
   // Potential flow cannot rotate, so each basin gets an explicit vortex added to the through-flow.
   swirls: [
-    { x: FORK.src.x, y: FORK.src.y, R: FORK.src.r, r0: 55, V: 0.5, dir: 1 },
+    { x: FORK.src.x, y: FORK.src.y, R: FORK.src.r, r0: 70, V: 1.0, dir: 1 },
     { x: FORK.basins[0].x, y: FORK.basins[0].y, R: FORK.basins[0].r, r0: 60, V: 0.55, dir: -1 },
     { x: FORK.basins[1].x, y: FORK.basins[1].y, R: FORK.basins[1].r, r0: 60, V: 0.55, dir: 1 },
   ],

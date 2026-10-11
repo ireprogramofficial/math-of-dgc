@@ -26,7 +26,7 @@
 .reveal h1, .reveal h2, .reveal h3 { margin: 0; line-height: 1.1; }
 .reveal h2 { font-size: 1.55em; letter-spacing: -0.01em; }
 .reveal .kicker { font-size: 0.55em; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
-.reveal .lede { color: var(--muted); font-size: 0.72em; margin: 8px 0 0; max-width: 900px; }
+.reveal .lede { color: var(--muted); font-size: 0.72em; margin: 8px 0 0; max-width: 1220px; }
 .reveal .katex { font-size: 1.05em; }
 .reveal p, .reveal li { line-height: 1.3; }
 
@@ -103,3 +103,28 @@
 .dirs button { width: 2.2em; padding: 3px 0 !important; font-weight: 700; }
 .dirs button:not(.on) { text-decoration: line-through; opacity: 0.55; }
 .legend-inline { display: inline-flex; gap: 12px; align-items: center; }
+
+/* ---------- definitions ---------- */
+.defn { background: var(--wash); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.defn-lead { margin: 0 0 6px !important; }
+.defn dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 0; }
+.defn dt { font-weight: 700; color: var(--accent2); white-space: nowrap; }
+.defn dd { margin: 0; }
+.defn .katex { font-size: 1em; }
+.fn { margin: 8px 0 0 !important; font-size: 0.82em; color: var(--muted); line-height: 1.25; }
+.on-example { border-left: 4px solid var(--accent); padding: 2px 0 2px 12px; }
+.on-example h3 { color: var(--accent); margin: 0 0 3px; }
+
+/* ---------- steering widget ---------- */
+.steer-chip { position: absolute; left: 10px; top: 10px; z-index: 3; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.9); color: var(--ink); box-shadow: 0 1px 6px rgba(20,40,70,0.18); pointer-events: none; }
+.steer-chip::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; background: var(--good); vertical-align: 0; }
+.steer-chip[data-mode="manual"] { background: var(--ink); color: #fff; }
+.steer-chip[data-mode="manual"]::before { background: var(--accent); }
+.steer-pad { position: absolute; right: 12px; bottom: 12px; z-index: 3; display: grid; grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); gap: 4px; touch-action: none; user-select: none; }
+.steer-pad .pad { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 !important; border-radius: 12px !important; line-height: 1; font-size: 15px; touch-action: none;
+  background: color-mix(in srgb, var(--accent) calc(var(--u, 0) * 100%), #ffffff); color: color-mix(in srgb, #ffffff calc(var(--u, 0) * 100%), var(--ink)); border: 1px solid var(--line); box-shadow: 0 1px 5px rgba(20,40,70,0.18); }
+.steer-pad .pad small { font-size: 10px; opacity: 0.7; margin-top: 2px; }
+.steer-pad .pad-N { grid-column: 2; grid-row: 1; }
+.steer-pad .pad-W { grid-column: 1; grid-row: 2; }
+.steer-pad .pad-E { grid-column: 3; grid-row: 2; }
+.steer-pad .pad-S { grid-column: 2; grid-row: 3; }

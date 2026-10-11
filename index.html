@@ -21,24 +21,66 @@
           </div>
         </section>
 
-        <!-- 2 · A family of rivers -->
+        <!-- 2 · Definition: dynamical system -->
         <section data-prevent-swipe>
           <div class="slide-head">
-            <div class="kicker">The running example</div>
-            <h2>A river is a vector field</h2>
-            <p class="lede">At every point the water has a velocity. Color shows speed; streaks show direction.</p>
+            <div class="kicker">Definition</div>
+            <h2>A dynamical system</h2>
+            <p class="lede">Color shows water speed and streaks show direction. Wherever something starts, the flow decides where it goes.</p>
           </div>
-          <div class="slide-body" style="grid-template-columns: 1fr;">
-            <div class="river-widget gallery" data-widget="gallery"></div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="gallery"></div>
+            <div class="side">
+              <div class="defn">
+                <p class="defn-lead">A <b>dynamical system</b> is a pair \((X, f)\):</p>
+                <dl>
+                  <dt>State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
+                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is a vector field called the <b>drift</b><sup>1</sup></dd>
+                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0)\): the state at time \(t\) from initial state \(x_0 \in X\), exactly one</dd>
+                </dl>
+                <p class="fn"><sup>1</sup> \(f\) is required to be locally Lipschitz, which guarantees a unique solution from each \(x_0\).</p>
+              </div>
+              <div class="on-example">
+                <h3>On the river</h3>
+                <p>\(X\) is the water (\(n = 2\)). The drift \(f(p) = w(p)\) is the water's velocity at \(p\), and a trajectory is the path a drifting leaf takes.</p>
+              </div>
+            </div>
           </div>
         </section>
 
-
-        <!-- 3 · Open-loop control-affine system -->
+        <!-- 3 · Definition: control system -->
         <section data-prevent-swipe>
           <div class="slide-head">
-            <div class="kicker">Part 1 · Dynamics and control</div>
-            <h2>A boat is a control-affine system</h2>
+            <div class="kicker">Definition</div>
+            <h2>A control system</h2>
+            <p class="lede">The same river, now with a boat that can push back. It steers itself between points. Take over with the thrusters and see what the drift does to you.</p>
+          </div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="control"></div>
+            <div class="side">
+              <div class="defn">
+                <p class="defn-lead">A <b>control system</b> is a tuple \((X, U, f, G)\):</p>
+                <dl>
+                  <dt>State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
+                  <dt>Control space</dt><dd>\(U \subseteq \mathbb{R}^m\), with control schedules<sup>1</sup> \(\mathcal{U} = \{\,u : [0,T] \to U\,\}\)</dd>
+                  <dt>Dynamics<sup>2</sup></dt><dd>\(\dot{x} = f(x) + G(x)\,u(t)\), where \(f : X \to \mathbb{R}^n\) is the drift and \(G : X \to \mathbb{R}^{n \times m}\) is the input map</dd>
+                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0, u)\), one for each \(u \in \mathcal{U}\)</dd>
+                </dl>
+                <p class="fn"><sup>1</sup> Each \(u\) is required to be measurable. <sup>2</sup> Dynamics affine in \(u\) are called <i>control-affine</i>; the general form is \(\dot{x} = f(x, u, t)\).</p>
+              </div>
+              <div class="on-example">
+                <h3>On the boat</h3>
+                <p>\(x = (p, v) \in \mathbb{R}^4\) and \(u = (u_N, u_E, u_S, u_W) \in [0,1]^4\): four thrusters. The drift <span class="swatch" style="background:#1f6fb2"></span> is the river dragging the boat; the input <span class="swatch" style="background:#d8572a"></span> is \(G u\).</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4 · Open-loop control schedule -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">Open-loop control</div>
+            <h2>A control schedule</h2>
             <p class="lede">Paint a thrust schedule on the timeline. The boat follows it blindly: that is what open loop means.</p>
           </div>
           <div class="slide-body cols-map-side">
@@ -57,7 +99,7 @@
           </div>
         </section>
 
-        <!-- 4 · Open-loop trajectory optimization -->
+        <!-- 5 · Open-loop trajectory optimization -->
         <section data-prevent-swipe>
           <div class="slide-head">
             <div class="kicker">Part 2 · Trajectory optimization</div>
