@@ -8,6 +8,9 @@ import renderMathInElement from 'katex/contrib/auto-render';
 import '../styles/deck.css';
 import './styles/deck.css';
 import { WIDGETS } from './widgets/index.js';
+import { buildHeaders } from './lib/header.js';
+
+buildHeaders(document.querySelector('.slides'));
 
 const deck = new Reveal({
   width: 1280,

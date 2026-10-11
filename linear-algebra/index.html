@@ -8,27 +8,50 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>" />
   </head>
   <body>
-    <div class="reveal">
+    <div class="reveal la-deck">
       <div class="slides">
 
         <!-- 1 · Title -->
         <section class="la-title">
-          <div class="title-card">
-            <div class="kicker">Working session</div>
+          <div class="la-title-card">
+            <div class="la-title-sections">
+              <span class="sec-terrain">Terrain</span><span class="sec-control">Control</span><span class="sec-optimization">Optimization</span><span class="sec-metrics">Metrics</span>
+            </div>
             <h1>The linear algebra of DGC</h1>
-            <p>A conceptual walkthrough of the matrices and solves in the DGC pipeline.</p>
+            <p>From a table of gene expression to a dosing schedule: the matrices, the fits, and the one least-squares problem underneath.</p>
           </div>
         </section>
 
-        <!-- 2 · Placeholder: replace with real content -->
-        <section>
-          <div class="slide-head">
-            <div class="kicker">Coming soon</div>
-            <h2>Outline</h2>
+        <!-- 2 · Terrain: data → TADs → A_k (stages advance with the arrow keys) -->
+        <section data-sec="terrain" data-label="Terrain · Data → Fit">
+          <h2 class="la-h">From measurements to transition matrices</h2>
+          <div class="la-body">
+            <div class="la-fill" data-widget="pipeline"></div>
           </div>
-          <div class="slide-body">
-            <p class="lede">Slides to follow. Math renders with KaTeX: \( A x = b \) inline, or display:</p>
-            $$ x_{k+1} = A_k x_k + B_k u_k $$
+          <span class="fragment la-step"></span><span class="fragment la-step"></span><span class="fragment la-step"></span><span class="fragment la-step"></span>
+        </section>
+
+        <!-- 3 · Terrain: what one A_k does -->
+        <section data-sec="terrain" data-label="Terrain · Fit" data-prevent-swipe>
+          <h2 class="la-h">What one \(A_k\) does</h2>
+          <div class="la-body la-cols">
+            <div class="la-fill" data-widget="akmap"></div>
+            <div class="la-side">
+              <p class="la-lead">$$A_k = I + \frac{(\tilde e_{k+1} - \tilde e_k)\,\tilde e_k^{\mathsf T}}{\tilde e_k^{\mathsf T}\tilde e_k}$$</p>
+              <p><b>Exact</b> — \(\tilde e_k\) lands on \(\tilde e_{k+1}\). The step in the data is reproduced, not approximated.</p>
+              <p><b>Untouched</b> — every direction orthogonal to \(\tilde e_k\) is left alone <span class="la-key" style="--c:#2e8b57">green</span>.</p>
+              <p><b>One stretch</b> — the only eigenvalue that isn't 1 is \(\lambda\), along \(\tilde e_{k+1} - \tilde e_k\) <span class="la-key" style="--c:#7c3aed">purple</span>.</p>
+              <p><b>Closest to \(I\)</b> — no other matrix that sends \(\tilde e_k\) to \(\tilde e_{k+1}\) is nearer the identity.</p>
+              <p class="la-note">In the real model the same picture holds in the plane of \(\tilde e_k\) and \(\tilde e_{k+1}\); the other 2,094 directions orthogonal to \(\tilde e_k\) stay fixed.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4 · Optimization: the reachable cone and NNLS -->
+        <section data-sec="optimization" data-label="Optimization · Solve" data-prevent-swipe>
+          <h2 class="la-h">The reachable set, and the closest endpoint</h2>
+          <div class="la-body">
+            <div class="la-fill" data-widget="cone"></div>
           </div>
         </section>
 
