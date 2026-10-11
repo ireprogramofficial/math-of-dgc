@@ -171,3 +171,14 @@
 
 .defn dl.numbered { row-gap: 9px; }
 .dt-sub { font-weight: 400; font-size: 0.85em; color: var(--muted); }
+
+/* ---------- DGC problem statement slide (no visualization) ---------- */
+.dgc-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; padding: 20px 40px; }
+.dgc-problem { font-size: 1.05em; }
+.dgc-problem .katex-display { margin: 0; }
+.dgc-table { border-collapse: collapse; font-size: 0.66em; width: 100%; max-width: 1150px; }
+.dgc-table th { text-align: left; font-weight: 700; color: var(--accent2); border-bottom: 2px solid var(--ink); padding: 6px 12px; }
+.dgc-table td { padding: 7px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.dgc-table td:first-child { font-weight: 700; color: var(--muted); width: 2.5em; }
+.dgc-table tr.group-end td { border-bottom: 2px solid #a9b8c8; }
+.dgc-table .katex { font-size: 1.05em; }

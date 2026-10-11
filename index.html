@@ -133,6 +133,33 @@
           </div>
         </section>
 
+        <!-- 6 · The DGC problem P(R) and the data it relies on (from dgc-problem-statement-slide.pptx, slide 3) -->
+        <section class="dgc-slide">
+          <div class="dgc-wrap">
+          <div class="dgc-problem">
+            $$\begin{aligned}
+              \min_{u \in \mathbb{R}^{M \times K}} \quad & \big\|\, x[K] - \textcolor{#1f6fb2}{x_{\text{target}}} \,\big\|_2 \\[6pt]
+              \text{s.t.} \quad & x[k+1] = \textcolor{#1f6fb2}{A[k]}\, x[k] + \textcolor{#d8572a}{B_R}\, u[k] \\[4pt]
+              & u[k] \ge 0 \\[4pt]
+              & x[0] = \textcolor{#1f6fb2}{x_{\text{initial}}}, \quad x[K]\ \text{free}
+            \end{aligned}$$
+          </div>
+          <table class="dgc-table">
+            <thead>
+              <tr><th>#</th><th>Name</th><th>Data type(s)</th><th>Defines</th><th>Cell type</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1a</td><td>Gene expression (initial)</td><td>Pseudotime-series scRNA-seq</td><td>\(\textcolor{#1f6fb2}{x_{\text{initial}},\ A[k]}\)</td><td>Initial (typically fibroblast)</td></tr>
+              <tr class="group-end"><td>1b</td><td>Gene expression (target)</td><td>scRNA-seq</td><td>\(\textcolor{#1f6fb2}{x_{\text{target}}}\)</td><td>Target (e.g., HSC, pancreatic beta cell)</td></tr>
+              <tr><td>2</td><td>TF gene targets</td><td>Variety</td><td>Unsigned entries of \(\textcolor{#d8572a}{B}\)</td><td>Invariant</td></tr>
+              <tr><td>3</td><td>TF activator/repressor labels</td><td>Variety</td><td>Column signs of \(\textcolor{#d8572a}{B}\)</td><td>Invariant</td></tr>
+              <tr><td>4</td><td>Gene accessibility</td><td>scATAC-seq</td><td>Zeroed rows of \(\textcolor{#d8572a}{B}\)</td><td>Initial (typically fibroblast)</td></tr>
+              <tr><td>5</td><td>Gene functional units / TADs</td><td>Hi-C</td><td>Dimension of \(x,\ \textcolor{#1f6fb2}{A[k]},\ \textcolor{#d8572a}{B}\)</td><td>Invariant (computed from fibroblast data)</td></tr>
+            </tbody>
+          </table>
+          </div>
+        </section>
+
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>
