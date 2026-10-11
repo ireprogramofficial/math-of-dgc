@@ -179,13 +179,22 @@ export class Autopilot {
   }
 
   /** Forget the current trip, e.g. after the user steered manually. */
-  reset() { this.goal = null; this.path = []; this.phase = 'travel'; }
+  reset() { this.goal = null; this.path = []; this.phase = 'travel'; this.fixed = false; }
+
+  /** Travel to one fixed destination and hold station there indefinitely. */
+  goTo(goal, pos) {
+    this.fixed = true;
+    this.goal = [goal[0], goal[1]];
+    this.path = this.planPath(pos, goal) ?? [this.goal];
+    this.idx = 0;
+    this.phase = 'travel';
+  }
 
   /** Per-frame timers (real seconds): the pause at an arrival point. */
   tick(dtReal, pos) {
     if (this.phase === 'hold') {
       this.holdLeft -= dtReal;
-      if (this.holdLeft <= 0) this.newGoal(pos);
+      if (this.holdLeft <= 0 && !this.fixed) this.newGoal(pos);
     }
   }
 
@@ -215,7 +224,7 @@ export class Autopilot {
   /** Thruster command u = (N, E, S, W) for state x = (px, py, vx, vy); h = sim seconds since the last call. */
   control(x, h = 0.4) {
     if (!this.goal) this.newGoal([x[0], x[1]]);
-    this._watchForStall(x, h);
+    if (!this.fixed) this._watchForStall(x, h);
     const { flow, o, model } = this;
     const px = x[0], py = x[1], vx = x[2], vy = x[3];
     const gx = this.goal[0] - px, gy = this.goal[1] - py, dGoal = Math.hypot(gx, gy);

@@ -1,6 +1,6 @@
 // Canvas drawing helpers shared by the boat slides (layout-pixel coordinates).
 
-export const COLORS = { thrust: '#d8572a', water: '#1f6fb2', ink: '#16283d', bad: '#c0392b', good: '#2e8b57' };
+export const COLORS = { thrust: '#d8572a', water: '#1f6fb2', ink: '#16283d', bad: '#c0392b', good: '#2e8b57', open: '#e8833a', closed: '#21a179' };
 
 /** An arrow from (x, y) by (dx, dy), with a white halo so it reads on any water color. */
 export function arrow(ctx, x, y, dx, dy, color, width = 3, head = 8) {
@@ -20,7 +20,7 @@ export function arrow(ctx, x, y, dx, dy, color, width = 3, head = 8) {
 }
 
 /** The boat hull, pointing along screen angle `ang` (radians, y down). */
-export function boatGlyph(ctx, x, y, ang, scale = 1, halo = false) {
+export function boatGlyph(ctx, x, y, ang, scale = 1, halo = false, fill = '#ffffff') {
   ctx.save();
   ctx.translate(x, y);
   if (halo) {
@@ -32,7 +32,7 @@ export function boatGlyph(ctx, x, y, ang, scale = 1, halo = false) {
   ctx.scale(scale, scale);
   ctx.beginPath();
   ctx.moveTo(13, 0); ctx.quadraticCurveTo(5, 6.5, -10, 6); ctx.lineTo(-10, -6); ctx.quadraticCurveTo(5, -6.5, 13, 0); ctx.closePath();
-  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = COLORS.ink; ctx.lineWidth = 2 / scale * Math.max(1, scale * 0.9);
+  ctx.fillStyle = fill; ctx.strokeStyle = COLORS.ink; ctx.lineWidth = 2 / scale * Math.max(1, scale * 0.9);
   ctx.shadowColor = 'rgba(20,40,70,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
   ctx.fill(); ctx.shadowColor = 'transparent'; ctx.stroke();
   ctx.restore();

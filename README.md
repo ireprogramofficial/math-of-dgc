@@ -31,8 +31,9 @@ rest. On the map slides: **drag** to pan, **scroll** to zoom, **double-click** t
 | 1 | `hero` | Title over a slowly drifting view of the two-basin fork with gyres |
 | 2 | `gallery` | **Definition: a dynamical system** (state space, drift, trajectory) beside the river as a vector field. Defaults to the meandering channel |
 | 3 | `control` | **Definition: a control system.** A boat steers itself between points (feedback autopilot, A* path plus pure pursuit) and pauses at each arrival. Hold **W A S D** or the on-screen pad to take over; after 7 s without input the autopilot resumes. No target or schedule is shown |
-| 4 | `schedule` | A control schedule: paint thrust on a timeline, switch thrusters off, press play (open loop) |
-| 5 | `optimize` | The open-loop trajectory optimization problem, solved live. Drag the target, disable thrusters, watch the plan change |
+| 4 | `loops` | **Key distinction: closed- versus open-loop.** Two block diagrams, and two boats leaving together for one target: open loop follows a precomputed schedule, closed loop reacts to its state. A gust pushes both; only the closed-loop boat recovers. Repeats; *Gust* and *Restart* buttons on the map |
+| 5 | `schedule` | A control schedule: paint thrust on a timeline, switch thrusters off, press play (open loop) |
+| 6 | `optimize` | **Definition: trajectory optimization**, solved live. Drag the target, disable thrusters, watch the plan change |
 
 Every interactive slide shares one control bar (`src/widgets/mapControls.js`): **River**, **Color** (blues by default; rainbow, viridis,
 plasma, turbo, or none) and **Camera** (the river's scripted views, with *Overview* as home). Pan and zoom are always available on the map.

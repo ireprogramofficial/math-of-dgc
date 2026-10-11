@@ -34,9 +34,8 @@
                 <p class="defn-lead">A <b>dynamical system</b> is a pair \((X, f)\):</p>
                 <dl>
                   <dt>State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
-                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is a vector field called the <b>drift</b><sup>1</sup></dd>
+                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is a vector field called the <b>drift</b></dd>
                 </dl>
-                <p class="fn"><sup>1</sup> \(f\) is required to be locally Lipschitz, which guarantees a unique solution from each \(x_0\).</p>
               </div>
               <div class="defn element">
                 <dl>
@@ -72,7 +71,43 @@
           </div>
         </section>
 
-        <!-- 4 · Open-loop control schedule -->
+        <!-- 4 · Key distinction: closed- versus open-loop -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">Key distinction</div>
+            <h2>Closed- versus open-loop</h2>
+          </div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="loops"></div>
+            <div class="side">
+              <div class="loop open">
+                <div class="loop-title">Open loop</div>
+                <div class="loop-row">
+                  <div class="blk">\(u(t)\)</div>
+                  <div class="arr"></div>
+                  <div class="blk plant">\(\dot{x} = f(x) + G(x)\,u\)</div>
+                  <div class="arr"></div>
+                  <div class="out">\(x\)</div>
+                </div>
+                <div class="loop-note">\(u\) is fixed in advance</div>
+              </div>
+              <div class="loop closed">
+                <div class="loop-title">Closed loop</div>
+                <div class="loop-row">
+                  <div class="blk">\(u = \kappa(x)\)</div>
+                  <div class="arr"></div>
+                  <div class="blk plant">\(\dot{x} = f(x) + G(x)\,u\)</div>
+                  <div class="arr"></div>
+                  <div class="out">\(x\)</div>
+                  <div class="feedback"></div>
+                </div>
+                <div class="loop-note">\(u\) reacts to \(x\)</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5 · Open-loop control schedule -->
         <section data-prevent-swipe>
           <div class="slide-head">
             <div class="kicker">Open-loop control</div>
@@ -94,11 +129,11 @@
           </div>
         </section>
 
-        <!-- 5 · Open-loop trajectory optimization -->
+        <!-- 6 · Definition: trajectory optimization -->
         <section data-prevent-swipe>
           <div class="slide-head">
-            <div class="kicker">Part 2 · Trajectory optimization</div>
-            <h2>Find the best schedule, not just a schedule</h2>
+            <div class="kicker">Definition</div>
+            <h2>Trajectory optimization</h2>
           </div>
           <div class="slide-body cols-map-side">
             <div class="river-widget" data-widget="optimize"></div>
