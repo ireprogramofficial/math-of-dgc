@@ -108,9 +108,11 @@ export class RiverView {
     const ticks = [0, 0.25, 0.5, 1, 1.5, 2].filter((v) => v <= vmax + 1e-9);
     const pos = (v) => (Math.pow(v / vmax, st.gamma) * 100).toFixed(1);
     this.legend.style.display = 'block';
-    this.legend.innerHTML = `<div class="rv-legend-title">Water speed</div>
+    // ticks near the right end are right-aligned so they never run past the bar; the unit lives in the title
+    const tick = (v) => { const x = +pos(v); return `<span style="left:${x}%;${x > 88 ? 'transform:translateX(-100%)' : x < 4 ? 'transform:none' : ''}">${v}</span>`; };
+    this.legend.innerHTML = `<div class="rv-legend-title">Water speed <span class="rv-legend-unit">(m/s)</span></div>
       <div class="rv-legend-bar" style="background:${colormapCSS(this.colormap)}"></div>
-      <div class="rv-legend-ticks">${ticks.map((v) => `<span style="left:${pos(v)}%">${v}</span>`).join('')}<span class="rv-legend-unit">m/s</span></div>${items}`;
+      <div class="rv-legend-ticks">${ticks.map(tick).join('')}</div>${items}`;
   }
 
   // ---------- camera helpers ----------

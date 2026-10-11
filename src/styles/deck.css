@@ -59,7 +59,7 @@
 .rv-legend-bar { height: 8px; border-radius: 3px; }
 .rv-legend-ticks { position: relative; height: 13px; margin-top: 2px; color: var(--muted); }
 .rv-legend-ticks span { position: absolute; transform: translateX(-50%); }
-.rv-legend-ticks .rv-legend-unit { right: 0; left: auto; transform: none; }
+.rv-legend-unit { font-weight: 400; color: var(--muted); }
 
 /* ---------- shared map widget: controls above, map in the middle, extras below ---------- */
 .map-widget { display: grid; gap: 8px; align-content: stretch; }
@@ -165,3 +165,6 @@
 .state-readout .katex { font-size: 1em; }
 .map-hint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 3; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,0.85); color: var(--muted); font-size: 13px; pointer-events: none; }
 .takeaway { margin-top: 6px !important; font-size: 1.25em; font-weight: 700; color: var(--ink); border-left: 5px solid #e8833a; padding: 6px 0 6px 12px; }
+
+/* the little boat beside the title */
+.title-boat { display: inline-block; width: 1.25em; height: 0.75em; margin-left: 0.25em; vertical-align: 0.05em; }
