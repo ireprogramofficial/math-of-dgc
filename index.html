@@ -68,6 +68,7 @@
                   <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0, u)\),<br>one for each \(u \in \mathcal{U}\)</dd>
                 </dl>
               </div>
+              <p>Drift dynamics and thrust dynamics together make the system's full dynamics.</p>
             </div>
           </div>
         </section>
@@ -123,9 +124,9 @@
                 <dl class="numbered">
                   <dt>1. State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
                   <dt>2. Control space<br><span class="dt-sub">(decision space)</span></dt><dd>\(U \subseteq \mathbb{R}^m\),<br>\(u \in \mathcal{U} = \{\,u : [0,T] \to U\,\}\)</dd>
-                  <dt>3. Objective</dt><dd>\(J(u) = \tfrac12 \|x(T) - x^\star\|_Q^2\)<br>\(+ \int_0^T \tfrac{\rho}{2}\|u(t)\|^2\,dt\)</dd>
+                  <dt>3. Objective</dt><dd>\(\|x(T) - x_{\text{target}}\|\)</dd>
                   <dt>4. Dynamics</dt><dd>\(\dot{x} = f(x) + G(x)\,u(t)\)</dd>
-                  <dt>5. Constraints</dt><dd>\(x(0) = x_0\),<br>\(0 \le u(t) \le 1\) for \(t \in [0, T]\)</dd>
+                  <dt>5. Constraints</dt><dd>\(x(0) = x_0\),<br>\(0 \le u(t) \le 1\)</dd>
                 </dl>
               </div>
             </div>
