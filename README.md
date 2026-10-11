@@ -28,10 +28,16 @@ rest. On the map slides: **drag** to pan, **scroll** to zoom, **double-click** t
 
 | Slide | Widget | What it shows |
 |---|---|---|
-| 1 | `hero` | Title over a slowly drifting view of the branching delta |
-| 2 | `gallery` | Six synthetic rivers, from a straight channel to a delta with five terminal basins. Pick a speed colormap (including none) and scripted camera moves |
+| 1 | `hero` | Title over a slowly drifting view of the two-basin fork with gyres |
+| 2 | `gallery` | Seven synthetic rivers, from a straight channel to a delta with five terminal basins. Shared controls for river, colormap and camera |
 | 3 | `schedule` | The components of an open-loop control-affine system, played out on the boat. Paint a thrust schedule, switch thrusters off, press play |
 | 4 | `optimize` | The open-loop trajectory optimization problem, solved live. Drag the target, disable thrusters, watch the plan change |
+
+Every interactive slide shares one control bar (`src/widgets/mapControls.js`): **River**, **Color** (blues by default; rainbow, viridis,
+plasma, turbo, or none) and **Camera** (the river's scripted views, with *Overview* as home). Pan and zoom are always available on the map.
+
+The rivers, simplest to most complex: straight channel, meandering channel, river into a lake, confluence, gyre, fork with gyres (one source basin,
+two meandering channels, two terminal basins, a vortex in each basin), and a branching delta (one source basin, five terminal basins).
 
 ### The model
 
@@ -54,18 +60,18 @@ The optimizer minimizes terminal miss + effort + a soft bank penalty with accele
 
 * **Rivers** (`scenarios.js`, `geometry.js`): water regions built from signed-distance shapes, plus where water enters and leaves.
 * **Flow** (`solver.js`): potential flow (Laplace's equation, solved coarse-to-fine by red-black SOR, in a Web Worker). Flux is conserved, so water speeds up in
-  narrow channels and slows in basins. The gyre is an analytic vortex.
+  narrow channels and slows in basins. Potential flow cannot rotate, so gyres are explicit vortices added on top (`swirls` in a scenario). The standalone gyre is an analytic vortex.
 * **Streaks** (`renderer.js`, `particles.js`): particles live in *screen* space, so density and on-screen speed stay constant at every zoom.
   The GPU rebuilds each streak's curved tail by integrating the flow backward in fixed pixel steps, so streaks follow the flow's curvature and stay
   readable from 1.6 km down to 50 m. Shorelines are drawn from a signed-distance texture, so they stay crisp at any zoom.
-* **Colormaps** (`colormaps.js`): `none`, rainbow (like the reference), viridis, plasma, turbo, blues.
+* **Colormaps** (`colormaps.js`): blues (default), rainbow, viridis, plasma, turbo, none. Streaks switch between white and ink according to the water color under them.
 
 ## Adding to the deck
 
 * **A slide**: add a `<section>` to `index.html`. Equations are KaTeX: `\( inline \)` and `$$ display $$`.
 * **A widget**: create `src/widgets/<name>.js` exporting `create(el)` that returns `{ setActive(on), destroy() }`, register it in
   `src/widgets/index.js`, and put `<div data-widget="<name>"></div>` in a slide. Widgets are created lazily and only animate while their slide is visible.
-* **A river**: add an entry to `src/river/scenarios.js`.
+* **A river**: add an entry to `src/river/scenarios.js`. Its first view is the shared *Overview*; give it `span`/`spanY` to frame its own content.
 * On slides with interactive maps, add `data-prevent-swipe` to the `<section>` so dragging on touch screens pans the map instead of changing slides.
 
 ## Deploying to GitHub Pages

@@ -1,11 +1,11 @@
-// Title-slide background: the branching delta, drifting slowly between views.
+// Title-slide background: the meandering fork, drifting slowly between views.
 import { RiverView } from '../river/view.js';
 
 export function create(el) {
-  const view = new RiverView(el, { scenario: 'delta', colormap: 'river-rainbow', interactive: false, legend: false, labels: false, density: 0.006 });
-  view.style = { cmapMix: 0.72, trailPx: 56 };
+  const view = new RiverView(el, { scenario: 'fork', interactive: false, legend: false, labels: false, density: 0.006 });
+  view.style = { trailPx: 56 };
   let i = 0, timer = 0;
-  const tour = [0, 1, 0, 2];
+  const tour = [0, 1, 2, 0, 3, 0];
   const next = () => { view.goto(tour[i++ % tour.length], 7000); timer = setTimeout(next, 9500); };
   return {
     setActive(on) {

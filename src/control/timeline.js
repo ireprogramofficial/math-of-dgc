@@ -15,7 +15,7 @@ export class Timeline {
     this.canvas = document.createElement('canvas');
     wrap.append(this.canvas);
     this.wrap = wrap;
-    this.rowH = 30;
+    this.rowH = 26;
     this.axisH = 24;
     this.labelW = 34;
     this.t = 0;

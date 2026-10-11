@@ -65,7 +65,7 @@ describe('optimizer', () => {
     }
   });
 
-  for (const id of ['straight', 'meander', 'lake', 'confluence', 'gyre', 'delta']) {
+  for (const id of ['straight', 'meander', 'lake', 'confluence', 'gyre', 'fork', 'delta']) {
     it(`${id}: reaches the default target`, () => {
       const { problem, scn } = setup(id);
       const opt = new TrajectoryOptimizer(problem);

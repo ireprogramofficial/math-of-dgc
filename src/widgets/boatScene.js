@@ -4,8 +4,8 @@
 import { BoatModel, NU } from '../control/boat.js';
 import { evaluate, makeProblem, project, TrajectoryOptimizer } from '../control/optimizer.js';
 import { Timeline } from '../control/timeline.js';
+import { DEFAULT_COLORMAP } from '../river/colormaps.js';
 import { RiverView } from '../river/view.js';
-import { getScenario } from '../river/scenarios.js';
 
 export const COLORS = { thrust: '#d8572a', water: '#1f6fb2', ink: '#16283d', bad: '#c0392b', good: '#2e8b57' };
 const N_INTERVALS = 60, SUBSTEPS = 5;
@@ -33,7 +33,7 @@ export class BoatScene {
    * @param {object} opts scenario, colormap, draggableTarget, showGhost, editable, onUpdate(scene)
    */
   constructor(stageEl, timelineWrap, opts = {}) {
-    this.opts = { scenario: 'straight', colormap: 'none', draggableTarget: false, showGhost: true, editable: true, autoplayAfterSolve: true, ...opts };
+    this.opts = { scenario: 'straight', colormap: DEFAULT_COLORMAP, draggableTarget: false, showGhost: true, editable: true, autoplayAfterSolve: true, ...opts };
     this.enabled = [true, true, true, true];
     this.U = new Float64Array(N_INTERVALS * NU);
     this.t = 0;
@@ -43,7 +43,7 @@ export class BoatScene {
     this.ghost = null;
     this.model = null;
     this.problem = null;
-    this.view = new RiverView(stageEl, { scenario: this.opts.scenario, colormap: this.opts.colormap, legend: this.opts.colormap !== 'none' });
+    this.view = new RiverView(stageEl, { scenario: this.opts.scenario, colormap: this.opts.colormap });
     this.view.onDraw = (ctx, v, now, dt) => this._frame(ctx, dt);
     this.view.onFlow = (flow, scn) => this._onFlow(flow, scn);
     this.timeline = new Timeline(timelineWrap, {
@@ -79,7 +79,7 @@ export class BoatScene {
   get scenario() { return this.view.scenario; }
   get T() { return this.problem?.T ?? 1; }
   setActive(on) { this.view.setActive(on); if (!on) this.playing = false; }
-  destroy() { this.timeline.destroy(); this.view.destroy(); }
+  destroy() { this._stopSolver(); this.timeline.destroy(); this.view.destroy(); }
   _notify() { this.opts.onUpdate?.(this); }
 
   async setScenario(id) {
@@ -97,7 +97,6 @@ export class BoatScene {
     const zero = new Float64Array(N_INTERVALS * NU);
     this.ghost = evaluate(this.problem, zero, false).X;
     this.timeline.setHorizon(N_INTERVALS, this.problem.T);
-    if (scn.boatView) this.view.camera.set(scn.boatView);
     this._recompute();
     this._notify();
   }
@@ -145,15 +144,24 @@ export class BoatScene {
     this.optimizer = new TrajectoryOptimizer(this.problem, this.U);
     this.playing = false;
     this._notify();
+    this._pump();
   }
   get solving() { return !!this.optimizer && !this.optimizer.done; }
-  _stopSolver() { this.optimizer = null; }
+  _stopSolver() { this.optimizer = null; clearTimeout(this._timer); }
+
+  // The solver runs on its own timer, not inside the animation frame, so a slow GPU (few frames per second)
+  // cannot starve it. Each chunk is short, so the page stays responsive between chunks.
+  _pump() {
+    clearTimeout(this._timer);
+    if (!this.optimizer) return;
+    this._timer = setTimeout(() => { this._stepSolver(); this._pump(); }, 0);
+  }
 
   _stepSolver() {
     const opt = this.optimizer;
     if (!opt) return;
     const t0 = performance.now();
-    while (!opt.done && performance.now() - t0 < 9) opt.run(2);
+    while (!opt.done && performance.now() - t0 < 14) opt.run(2);
     this.U.set(opt.U);
     this._recompute();
     if (opt.done) {
@@ -176,7 +184,6 @@ export class BoatScene {
   // ---- per-frame: advance time/solver, then draw overlay ----
   _frame(ctx, dt) {
     if (!this.problem) return;
-    if (this.optimizer) this._stepSolver();
     if (this.playing) {
       this.t = Math.min(this.t + dt * (this.T / 14), this.T);
       if (this.t >= this.T) this.playing = false;

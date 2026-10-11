@@ -62,8 +62,16 @@ uniform float uTrailPx;    // device px
 uniform float uWidthPx;    // device px
 uniform float uSpeedRef;
 uniform float uAlpha;
+uniform sampler2D uCmap;
+uniform float uSpeedMax;
+uniform float uGamma;
+uniform float uCmapMix;
+uniform vec3 uWater;
+uniform vec3 uLight;
+uniform vec3 uDark;
 out float vAlpha;
 out float vSide;
+out vec3 vColor;
 const int K = ${TRAIL_STEPS};
 
 vec4 fld(vec2 p) { return texture(uField, p / uWorld); }
@@ -98,7 +106,12 @@ void main() {
 
   float ph = aP.z;
   float life = smoothstep(0.0, 0.12, ph) * (1.0 - smoothstep(0.8, 1.0, ph));
-  vAlpha = pow(1.0 - tail, 1.3) * life * (0.55 + 0.45 * rel) * uAlpha * (alive ? 1.0 : 0.0);
+  // Pick ink or white from the luminance of the water color under the streak's head.
+  float tt = pow(clamp(length(f0.xy) / uSpeedMax, 0.0, 1.0), uGamma);
+  vec3 wc = mix(uWater, texture(uCmap, vec2(tt, 0.5)).rgb, uCmapMix);
+  float dark = smoothstep(0.5, 0.68, dot(wc, vec3(0.299, 0.587, 0.114)));
+  vColor = mix(uLight, uDark, dark);
+  vAlpha = pow(1.0 - tail, 1.3) * life * (0.55 + 0.45 * rel) * uAlpha * mix(1.0, 0.7, dark) * (alive ? 1.0 : 0.0);
   vSide = side;
 }`;
 
@@ -106,11 +119,11 @@ const STREAK_FRAG = `#version 300 es
 precision mediump float;
 in float vAlpha;
 in float vSide;
-uniform vec3 uColor;
+in vec3 vColor;
 out vec4 outColor;
 void main() {
   float e = 1.0 - smoothstep(0.35, 1.0, abs(vSide));
-  outColor = vec4(uColor, vAlpha * e);
+  outColor = vec4(vColor, vAlpha * e);
 }`;
 
 function compile(gl, type, src) {
@@ -137,8 +150,9 @@ export const DEFAULT_STYLE = {
   land: [0.945, 0.925, 0.878],
   water: [0.78, 0.875, 0.945],
   shore: [0.54, 0.62, 0.7],
-  streakColor: [0.14, 0.3, 0.52],
-  streakAlpha: 0.85,
+  streakLight: [1, 1, 1],
+  streakDark: [0.12, 0.27, 0.48],
+  streakAlpha: 0.9,
   trailPx: 52,
   widthPx: 1.9,
   cmapMix: 0.9,
@@ -239,7 +253,13 @@ export class RiverRenderer {
       gl.uniform1f(s.uWidthPx, st.widthPx * k);
       gl.uniform1f(s.uSpeedRef, flow.speedRef);
       gl.uniform1f(s.uAlpha, st.streakAlpha);
-      gl.uniform3fv(s.uColor, st.streakColor);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.cmapTex); gl.uniform1i(s.uCmap, 1);
+      gl.uniform1f(s.uSpeedMax, flow.speedRef * st.speedMaxFactor);
+      gl.uniform1f(s.uGamma, st.gamma);
+      gl.uniform1f(s.uCmapMix, this.colormap === 'none' ? 0 : st.cmapMix);
+      gl.uniform3fv(s.uWater, st.water);
+      gl.uniform3fv(s.uLight, st.streakLight);
+      gl.uniform3fv(s.uDark, st.streakDark);
       gl.bindVertexArray(this.streakVao);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.streakBuf);
       const bytes = count * 12;

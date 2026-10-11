@@ -7,14 +7,15 @@ const STOPS = {
   viridis: ['#440154', '#482878', '#3e4a89', '#31688e', '#26828e', '#1f9e89', '#35b779', '#6ece58', '#b5de2b', '#fde725'],
   plasma: ['#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786', '#d8576b', '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'],
   turbo: ['#30123b', '#4662d7', '#36aaf9', '#1ae4b6', '#72fe5e', '#c7ef34', '#faba39', '#f66b19', '#ca2a04', '#7a0403'],
-  // Calm, one-hue ramp that stays legible on a light page.
-  blues: ['#e3eef9', '#b9d4ee', '#8bb8e0', '#5b98d0', '#3578b8', '#1f5a9c', '#123f78', '#0a2a55'],
+  // Calm, one-hue ramp for a light page. The default everywhere in the deck.
+  blues: ['#d3e5f6', '#a9cbe8', '#7fb0dc', '#5594cd', '#3376b5', '#1d5a9b', '#10407c', '#0a2a55'],
 };
 
-export const COLORMAP_NAMES = ['none', ...Object.keys(STOPS)];
+export const DEFAULT_COLORMAP = 'blues';
+export const COLORMAP_NAMES = ['blues', ...Object.keys(STOPS).filter((n) => n !== 'blues'), 'none'];
 export const COLORMAP_LABELS = {
   none: 'None',
-  'river-rainbow': 'Rainbow (like the reference)',
+  'river-rainbow': 'Rainbow',
   viridis: 'Viridis',
   plasma: 'Plasma',
   turbo: 'Turbo',

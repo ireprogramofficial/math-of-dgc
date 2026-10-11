@@ -27,7 +27,8 @@ export class Camera {
   /** A view {cx, cy, span} (span = visible width in meters) as a concrete {cx, cy, zoom}. */
   resolve(view) {
     if (view.zoom) return { cx: view.cx, cy: view.cy, zoom: view.zoom };
-    return { cx: view.cx, cy: view.cy, zoom: this.w / view.span };
+    // `span` x `spanY` (default 16:9) is a frame that must fit entirely, so overviews never clip on any stage shape.
+    return { cx: view.cx, cy: view.cy, zoom: Math.min(this.w / view.span, this.h / (view.spanY ?? view.span * 0.5625)) };
   }
 
   /** Fit the whole domain with a margin. */

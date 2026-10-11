@@ -3,7 +3,6 @@ import { createBoatWidget } from './boatWidget.js';
 
 export function create(el) {
   return createBoatWidget(el, {
-    scenarios: ['straight', 'meander', 'lake', 'confluence', 'gyre', 'delta'],
     scenario: 'meander',
     presets: [],
     solve: true,

@@ -1,8 +1,8 @@
 // Shared UI for the boat slides: map + toolbar (scenario, thrusters, presets, play, solve) + linked timeline.
 import { DIRS } from '../control/boat.js';
-import { SCENARIOS, getScenario } from '../river/scenarios.js';
 import { BoatScene, COLORS } from './boatScene.js';
-import { h, select } from './ui.js';
+import { createMapControls } from './mapControls.js';
+import { h } from './ui.js';
 
 const PRESETS = {
   drift: { label: 'Drift only', fn: () => [0, 0, 0, 0] },
@@ -15,7 +15,7 @@ const PRESETS = {
  * @param {object} cfg { scenarios: string[], scenario, solve: bool, presets: string[], draggableTarget: bool, colormap }
  */
 export function createBoatWidget(el, cfg) {
-  el.classList.add('boat-widget');
+  el.classList.add('map-widget', 'boat-widget');
   const stage = h('div', { class: 'stage' });
   const timelineWrap = h('div', { class: 'timeline-wrap' });
   const readout = h('span', { class: 'readout' });
@@ -24,7 +24,7 @@ export function createBoatWidget(el, cfg) {
   const solveBtn = cfg.solve ? h('button', { type: 'button', class: 'primary' }, 'Solve') : null;
 
   const scene = new BoatScene(stage, timelineWrap, {
-    scenario: cfg.scenario, colormap: cfg.colormap ?? 'none', draggableTarget: !!cfg.draggableTarget, editable: true,
+    scenario: cfg.scenario, draggableTarget: !!cfg.draggableTarget, editable: true,
     autoplayAfterSolve: true, onUpdate: update,
   });
 
@@ -50,14 +50,6 @@ export function createBoatWidget(el, cfg) {
   }
 
   const controls = h('div', { class: 'boat-toolbar' },
-    cfg.scenarios.length > 1 && h('label', {}, 'River',
-      select(cfg.scenarios.map((id) => ({ value: id, label: getScenario(id).name })), cfg.scenario, async (id) => {
-        await scene.setScenario(id);
-        dirBtns.forEach((b) => b.classList.add('on'));
-        scene.enabled.fill(true);
-        refreshTargetChips();
-        update();
-      })),
     h('span', { class: 'legend-inline' }, h('span', { class: 'readout' }, 'Thrusters'), h('span', { class: 'dirs' }, dirBtns)),
     ...(cfg.presets ?? []).map((k) => {
       const b = h('button', { type: 'button' }, PRESETS[k].label);
@@ -80,7 +72,16 @@ export function createBoatWidget(el, cfg) {
 
   playBtn.addEventListener('click', () => (scene.playing ? scene.pause() : scene.play()));
   solveBtn?.addEventListener('click', () => scene.startSolve());
-  el.append(stage, h('div', {}, toolbar, timelineWrap));
+  const mapControls = createMapControls(scene.view, {
+    onScenario: async (id) => {
+      await scene.setScenario(id);
+      dirBtns.forEach((b) => b.classList.add('on'));
+      scene.enabled.fill(true);
+      refreshTargetChips();
+      update();
+    },
+  });
+  el.append(mapControls.el, stage, h('div', {}, toolbar, timelineWrap));
 
   function update() {
     const s = scene.stats();

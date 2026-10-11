@@ -5,7 +5,7 @@
 // every overlay proportional to the slide text. `view.k` converts layout px to device px.
 
 import { Camera } from './camera.js';
-import { colormapCSS, COLORMAP_NAMES } from './colormaps.js';
+import { colormapCSS, COLORMAP_NAMES, DEFAULT_COLORMAP } from './colormaps.js';
 import { loadFlow } from './flowLoader.js';
 import { ParticleSystem } from './particles.js';
 import { DEFAULT_STYLE, RiverRenderer } from './renderer.js';
@@ -14,7 +14,7 @@ import { getScenario, WORLD } from './scenarios.js';
 export class RiverView {
   constructor(el, opts = {}) {
     this.el = el;
-    this.opts = { interactive: true, legend: true, labels: true, colormap: 'none', scenario: 'straight', ...opts };
+    this.opts = { interactive: true, legend: true, labels: true, colormap: DEFAULT_COLORMAP, scenario: 'straight', ...opts };
     el.classList.add('rv');
     el.innerHTML = '';
     this.glCanvas = Object.assign(document.createElement('canvas'), { className: 'rv-gl' });
@@ -70,7 +70,7 @@ export class RiverView {
     this.renderer.setFlow(flow);
     if (this.particles) this.particles.setFlow(flow);
     else this.particles = new ParticleSystem(flow, { density: this.opts.density ?? 0.0075 });
-    this.camera.set(view ?? this.camera.homeView());
+    this.camera.set(view ?? this._homeView());
     this.loading.style.display = 'none';
     this._updateLegend();
     this.onFlow?.(flow, this.scenario);
@@ -84,9 +84,7 @@ export class RiverView {
   }
 
   _streakStyle() {
-    return this.colormap === 'none'
-      ? { streakColor: DEFAULT_STYLE.streakColor, streakAlpha: 0.62, widthPx: 1.6 }
-      : { streakColor: [1, 1, 1], streakAlpha: 0.92 };
+    return this.colormap === 'none' ? { streakAlpha: 0.65, widthPx: 1.6 } : { streakAlpha: 0.92 };
   }
 
   _updateLegend() {
@@ -107,7 +105,12 @@ export class RiverView {
     const v = typeof viewOrIndex === 'number' ? this.scenario.views[viewOrIndex] : viewOrIndex;
     if (ms <= 0) this.camera.set(v); else this.camera.animateTo(v, ms);
   }
-  home(ms = 1200) { ms <= 0 ? this.camera.set(this.camera.homeView()) : this.camera.animateTo(this.camera.homeView(), ms); }
+  /** The scenario's first view ("Overview") is home everywhere: initial view, reset, and resize re-fit. */
+  _homeView() {
+    const v = this.scenario?.views?.[0];
+    return v ? this.camera.resolve(v) : this.camera.homeView();
+  }
+  home(ms = 1200) { ms <= 0 ? this.camera.set(this._homeView()) : this.camera.animateTo(this._homeView(), ms); }
 
   // ---------- lifecycle ----------
   setActive(on) {
@@ -141,14 +144,14 @@ export class RiverView {
     if (this.camera.w !== lw || this.camera.h !== lh) {
       const hadHome = this._atHome();
       this.camera.resize(lw, lh);
-      if (hadHome || !this.flow) this.camera.set(this.camera.homeView());
+      if (hadHome || !this.flow) this.camera.set(this._homeView());
     }
     this._rectW = rect.width;
     return true;
   }
 
   _atHome() {
-    const h = this.camera.homeView(), c = this.camera;
+    const h = this._homeView(), c = this.camera;
     return Math.abs(Math.log(c.zoom / h.zoom)) < 0.02 && Math.abs(c.cx - h.cx) < 5;
   }
 

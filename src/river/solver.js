@@ -40,6 +40,7 @@ export function computeFlow(scenarioOrId, { nx = 480, bankProfile = 45, tol = 2e
     prev = { grid, phi: res.phi };
   }
   velocityFromPhi(grid, prev.phi, bankProfile, scn.speedRef);
+  if (scn.swirls) addSwirls(grid, scn.swirls);
   return finish(scn, grid, stats);
 }
 
@@ -196,6 +197,28 @@ function velocityFromPhi(g, phi, bankProfile, speedRef) {
     const s = Math.hypot(ux, vy);
     if (s > cap) { ux *= cap / s; vy *= cap / s; }
     u[k] = ux; v[k] = vy;
+  }
+}
+
+/**
+ * Adds vortices (e.g. a gyre in a basin) on top of the potential through-flow, which is irrotational by construction.
+ * Each swirl is a Lamb-Oseen-like profile (solid-body core, decaying tail) windowed to zero at the basin rim.
+ * Speeds are absolute (m/s), added after normalization.
+ */
+function addSwirls({ nx, ny, cell, water, u, v }, swirls) {
+  const smooth = (a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const k = j * nx + i;
+    if (!water[k]) continue;
+    const x = (i + 0.5) * cell, y = (j + 0.5) * cell;
+    for (const s of swirls) {
+      const dx = x - s.x, dy = y - s.y, r = Math.hypot(dx, dy);
+      if (r >= s.R || r < 1e-6) continue;
+      const q = r / s.r0;
+      const vt = s.dir * s.V * q * Math.exp(0.5 * (1 - q * q)) * (1 - smooth(0.6 * s.R, s.R, r));
+      u[k] += (-vt * dy) / r;
+      v[k] += (vt * dx) / r;
+    }
   }
 }
 

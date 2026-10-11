@@ -49,6 +49,23 @@ describe('flow solver', () => {
     }
   });
 
+  it('fork: through-flow reaches both basins, with a gyre in each (opposite senses)', () => {
+    const { flow } = flowOf('fork');
+    expect(flow.velocity(300, 470)[0]).toBeGreaterThan(0.3);                    // trunk flows east
+    expect(flow.isWater(1420, 270, 20) && flow.isWater(1420, 630, 20)).toBe(true);
+    // basin 1 turns clockwise (east of center the water moves south), basin 2 counter-clockwise
+    expect(flow.velocity(1465, 270)[1]).toBeLessThan(-0.2);
+    expect(flow.velocity(1465, 630)[1]).toBeGreaterThan(0.2);
+    // the swirl is confined to the basins: the channels are still dominated by the through-flow
+    expect(flow.velocity(900, 330)[0]).toBeGreaterThan(0.3);
+  });
+
+  it('fork: a path with only two terminal basins (plus the source basin)', async () => {
+    const { SCENARIO_BY_ID } = await import('../src/river/scenarios.js');
+    expect(SCENARIO_BY_ID.fork.sinks.length).toBe(2);
+    expect(SCENARIO_BY_ID.fork.swirls.length).toBe(3);
+  });
+
   it('gyre: counter-clockwise rotation', () => {
     const { flow } = flowOf('gyre');
     expect(flow.velocity(1000, 450)[1]).toBeGreaterThan(0.5);   // east of center: moving north

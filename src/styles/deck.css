@@ -54,25 +54,27 @@
 .rv { position: relative; overflow: hidden; background: #f1eadf; }
 .rv-gl, .rv-overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .rv-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: var(--muted); background: #f4efe6; letter-spacing: 0.04em; }
-.rv-legend { position: absolute; left: 14px; bottom: 12px; width: 240px; padding: 6px 10px 8px; background: rgba(255,255,255,0.86); border-radius: 8px; font-size: 13px; line-height: 1.1; box-shadow: 0 1px 6px rgba(20,40,70,0.15); pointer-events: none; }
-.rv-legend-title { font-weight: 700; color: var(--ink); margin-bottom: 4px; }
-.rv-legend-bar { height: 10px; border-radius: 3px; }
-.rv-legend-ticks { position: relative; height: 16px; margin-top: 3px; color: var(--muted); }
+.rv-legend { position: absolute; left: 10px; bottom: 8px; width: 190px; padding: 4px 8px 6px; background: rgba(255,255,255,0.86); border-radius: 8px; font-size: 11px; line-height: 1.1; box-shadow: 0 1px 6px rgba(20,40,70,0.15); pointer-events: none; }
+.rv-legend-title { font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.rv-legend-bar { height: 8px; border-radius: 3px; }
+.rv-legend-ticks { position: relative; height: 13px; margin-top: 2px; color: var(--muted); }
 .rv-legend-ticks span { position: absolute; transform: translateX(-50%); }
 .rv-legend-ticks .rv-legend-unit { right: 0; left: auto; transform: none; }
 
-.gallery { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; }
-.gallery .stage, .boat-widget .stage { border-radius: 12px; border: 1px solid var(--line); min-height: 0; }
-.panel { display: flex; flex-direction: column; gap: 8px; font-size: 0.62em; overflow: hidden; }
-.panel-head { font-weight: 700; color: var(--accent2); margin-top: 2px; }
-.panel-head small { font-weight: 400; color: var(--muted); }
-.panel-title { font-size: 1.35em; font-weight: 700; margin-top: 4px; }
-.panel-blurb { color: var(--muted); line-height: 1.3; min-height: 3.9em; }
-.hint { color: var(--muted); font-size: 0.9em; margin-top: auto; }
-.scn-list { display: flex; flex-direction: column; gap: 4px; }
-.scn { display: flex; gap: 8px; align-items: center; text-align: left; padding: 5px 9px; }
-.scn-dots { color: var(--accent); letter-spacing: 1px; font-size: 0.8em; }
-.panel-views { display: flex; flex-wrap: wrap; gap: 5px; }
+/* ---------- shared map widget: controls above, map in the middle, extras below ---------- */
+.map-widget { display: grid; gap: 8px; align-content: stretch; }
+.map-widget.gallery { grid-template-rows: auto minmax(0, 1fr); }
+.map-widget.boat-widget { grid-template-rows: auto minmax(0, 1fr) auto; }
+.map-widget .stage { border-radius: 12px; border: 1px solid var(--line); min-height: 0; position: relative; }
+.map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 0.6em; }
+.map-controls label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 600; }
+.map-controls select { max-width: 190px; }
+.map-cam-wrap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.map-label { color: var(--muted); font-weight: 600; }
+.map-cam { display: inline-flex; gap: 5px; flex-wrap: wrap; }
+.map-top { display: flex; flex-direction: column; gap: 5px; }
+.map-caption { font-size: 0.6em; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
+.map-dots { color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
 
 /* buttons, selects */
 .reveal button, .reveal select { font: inherit; font-size: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; cursor: pointer; }
@@ -88,8 +90,6 @@
 .seg button:last-child { border-radius: 0 7px 7px 0; }
 
 /* ---------- boat widgets ---------- */
-.boat-widget { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 10px; }
-.boat-widget .stage { position: relative; }
 .boat-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 0.6em; }
 .toolbars { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
 .boat-toolbar.info { gap: 6px 18px; }
