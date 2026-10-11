@@ -4,6 +4,5 @@ export const WIDGETS = {
   gallery: () => import('./gallery.js'),
   control: () => import('./control.js'),
   loops: () => import('./loops.js'),
-  schedule: () => import('./schedule.js'),
   optimize: () => import('./optimize.js'),
 };

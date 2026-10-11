@@ -60,14 +60,15 @@ export function createBoatWidget(el, cfg) {
     targetChips,
   );
   const info = h('div', { class: 'boat-toolbar info' },
-    h('span', { class: 'legend-inline readout' },
-      h('span', {}, h('i', { class: 'swatch', style: { background: COLORS.water } }), 'water velocity'),
-      h('span', {}, h('i', { class: 'swatch', style: { background: COLORS.thrust } }), 'thrust'),
-      h('span', {}, h('i', { class: 'swatch', style: { background: COLORS.ink } }), 'boat velocity'),
-      h('span', {}, '┈ drift-only path')),
     readout, note,
   );
   const toolbar = h('div', { class: 'toolbars' }, controls, info);
+  scene.view.setLegendItems([
+    { color: COLORS.water, text: 'water velocity' },
+    { color: COLORS.thrust, text: 'thrust' },
+    { color: COLORS.ink, text: 'boat velocity' },
+    { color: COLORS.ink, text: 'drift-only path', dash: true },
+  ]);
 
   playBtn.addEventListener('click', () => (scene.playing ? scene.pause() : scene.play()));
   solveBtn?.addEventListener('click', () => scene.startSolve());

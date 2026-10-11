@@ -94,7 +94,10 @@ export class RiverView {
   _legendItemsHTML() {
     return (this.legendItems ?? []).map((it) => {
       const label = it.tex ? katex.renderToString(it.tex, { throwOnError: false }) : '';
-      return `<div class="rv-legend-item"><svg width="26" height="10" viewBox="0 0 26 10"><path d="M1 5H19" stroke="${it.color}" stroke-width="3" stroke-linecap="round"/><path d="M25 5L17 0.5V9.5Z" fill="${it.color}"/></svg>${it.text ?? ''} ${label}</div>`;
+      const icon = it.dash
+        ? `<path d="M1 5H25" stroke="${it.color}" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 5"/>`
+        : `<path d="M1 5H19" stroke="${it.color}" stroke-width="3" stroke-linecap="round"/><path d="M25 5L17 0.5V9.5Z" fill="${it.color}"/>`;
+      return `<div class="rv-legend-item"><svg width="26" height="10" viewBox="0 0 26 10">${icon}</svg>${it.text ?? ''} ${label}</div>`;
     }).join('');
   }
 

@@ -10,7 +10,7 @@ import { createMapControls } from './mapControls.js';
 import { createStateReadout } from './stateReadout.js';
 import { h } from './ui.js';
 
-const PROBE_SECONDS = 5, FADE_SECONDS = 1.5, TIME_SCALE = 40, MAX_STEP = 0.5;
+const PROBE_SECONDS = 8, FADE_SECONDS = 1.5, TIME_SCALE = 40, MAX_STEP = 0.5;
 
 export function create(el) {
   el.classList.add('map-widget', 'gallery');

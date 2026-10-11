@@ -168,3 +168,6 @@
 
 /* the little boat beside the title */
 .title-boat { display: inline-block; width: 1.25em; height: 0.75em; margin-left: 0.25em; vertical-align: 0.05em; }
+
+.defn dl.numbered { row-gap: 9px; }
+.dt-sub { font-weight: 400; font-size: 0.85em; color: var(--muted); }
