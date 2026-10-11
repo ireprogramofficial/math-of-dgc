@@ -230,6 +230,7 @@ export class RiverView {
       c.setPointerCapture(e.pointerId);
       this._pointers.set(e.pointerId, { x: sx, y: sy });
       if (this._pointers.size === 1) {
+        this._down = { x: sx, y: sy, t: performance.now() };
         const w = this.camera.screenToWorld(sx, sy);
         this._tool = this.tools.find((t) => t.pointerDown?.(w, e, this)) ?? null;
       } else this._tool = null;
@@ -259,7 +260,12 @@ export class RiverView {
     const up = (e) => {
       const [sx, sy] = this._local(e);
       if (this._tool) this._tool.pointerUp?.(this.camera.screenToWorld(sx, sy), e, this);
+      // a click: a short press that barely moved, not consumed by a tool (otherwise it was a pan)
+      else if (this._down && this._pointers.size === 1 && Math.hypot(sx - this._down.x, sy - this._down.y) < 5 && performance.now() - this._down.t < 600) {
+        this.onClick?.(this.camera.screenToWorld(sx, sy), e);
+      }
       this._tool = null;
+      this._down = null;
       this._pointers.delete(e.pointerId);
     };
     c.addEventListener('pointerup', up);

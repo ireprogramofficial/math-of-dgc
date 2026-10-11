@@ -2,6 +2,7 @@
 import { DIRS } from '../control/boat.js';
 import { COLORS } from './draw.js';
 import { createMapControls } from './mapControls.js';
+import { createStateReadout } from './stateReadout.js';
 import { SteerScene } from './steerScene.js';
 import { h } from './ui.js';
 
@@ -23,6 +24,7 @@ export function create(el) {
   });
   const pad = h('div', { class: 'steer-pad', 'data-prevent-swipe': '' }, ...padBtns);
   stage.append(chip, pad);
+  const readout = createStateReadout(stage);
 
   const controls = createMapControls(scene.view, { onScenario: (id) => scene.setScenario(id) });
   scene.view.setLegendItems([
@@ -34,6 +36,7 @@ export function create(el) {
   let lastMode = '', lastText = '';
   function update({ mode, secondsLeft, u, holding }) {
     padBtns.forEach((b, c) => b.style.setProperty('--u', u[c].toFixed(2)));
+    readout.set(scene.boat.x);
     if (mode !== lastMode) { chip.dataset.mode = mode; lastMode = mode; }
     const text = mode === 'manual' ? `Manual steering · autopilot resumes in ${Math.ceil(secondsLeft)} s` : holding ? 'Autopilot · arrived, pausing' : 'Autopilot · steering to a new point';
     if (text !== lastText) { chip.textContent = text; lastText = text; }
