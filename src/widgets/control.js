@@ -31,7 +31,7 @@ export function create(el) {
       h('span', {}, h('i', { class: 'swatch', style: { background: COLORS.thrust } }), 'input G(x)u')),
     h('span', { class: 'readout' }, `Steer yourself: hold W A S D or the pad. The autopilot resumes after ${MANUAL_HOLD_MS / 1000} s without input.`),
   );
-  el.append(controls.el, stage, info);
+  el.append(stage, info, controls.el);
 
   let lastMode = '', lastText = '';
   function update({ mode, secondsLeft, u, holding }) {

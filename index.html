@@ -29,20 +29,20 @@
             <p class="lede">Color shows water speed and streaks show direction. Wherever something starts, the flow decides where it goes.</p>
           </div>
           <div class="slide-body cols-map-side">
-            <div class="river-widget" data-widget="gallery"></div>
+            <div class="river-widget" data-widget="gallery" data-scenario="meander" data-label="\dot{x} = f(x)"></div>
             <div class="side">
               <div class="defn">
                 <p class="defn-lead">A <b>dynamical system</b> is a pair \((X, f)\):</p>
                 <dl>
                   <dt>State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
                   <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is a vector field called the <b>drift</b><sup>1</sup></dd>
-                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0)\): the state at time \(t\) from initial state \(x_0 \in X\), exactly one</dd>
                 </dl>
                 <p class="fn"><sup>1</sup> \(f\) is required to be locally Lipschitz, which guarantees a unique solution from each \(x_0\).</p>
               </div>
-              <div class="on-example">
-                <h3>On the river</h3>
-                <p>\(X\) is the water (\(n = 2\)). The drift \(f(p) = w(p)\) is the water's velocity at \(p\), and a trajectory is the path a drifting leaf takes.</p>
+              <div class="defn element">
+                <dl>
+                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0)\): the state at time \(t\) from initial state \(x_0 \in X\), exactly one</dd>
+                </dl>
               </div>
             </div>
           </div>

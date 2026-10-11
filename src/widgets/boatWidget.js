@@ -81,7 +81,7 @@ export function createBoatWidget(el, cfg) {
       update();
     },
   });
-  el.append(mapControls.el, stage, h('div', {}, toolbar, timelineWrap));
+  el.append(stage, h('div', {}, toolbar, timelineWrap), mapControls.el);
 
   function update() {
     const s = scene.stats();

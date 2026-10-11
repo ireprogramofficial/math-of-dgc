@@ -63,18 +63,19 @@
 
 /* ---------- shared map widget: controls above, map in the middle, extras below ---------- */
 .map-widget { display: grid; gap: 8px; align-content: stretch; }
-.map-widget.gallery { grid-template-rows: auto minmax(0, 1fr); }
-.map-widget.boat-widget { grid-template-rows: auto minmax(0, 1fr) auto; }
+.map-widget.gallery { grid-template-rows: minmax(0, 1fr) auto; }
+.map-widget.boat-widget { grid-template-rows: minmax(0, 1fr) auto auto; }
 .map-widget .stage { border-radius: 12px; border: 1px solid var(--line); min-height: 0; position: relative; }
-.map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 0.6em; }
-.map-controls label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 600; }
-.map-controls select { max-width: 190px; }
-.map-cam-wrap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.map-label { color: var(--muted); font-weight: 600; }
-.map-cam { display: inline-flex; gap: 5px; flex-wrap: wrap; }
-.map-top { display: flex; flex-direction: column; gap: 5px; }
-.map-caption { font-size: 0.6em; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
-.map-dots { color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
+.map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; font-size: 0.42em; color: var(--muted); opacity: 0.6; transition: opacity 0.2s; }
+.map-controls:hover, .map-controls:focus-within { opacity: 1; }
+.map-controls label { display: inline-flex; align-items: center; gap: 4px; font-weight: 400; }
+.reveal .map-controls select, .reveal .map-controls button { border-color: transparent; background: transparent; padding: 1px 5px; color: var(--muted); }
+.reveal .map-controls select:hover, .reveal .map-controls button:hover { border-color: var(--line); background: var(--paper); color: var(--ink); }
+.map-controls select { max-width: 170px; }
+.map-cam-wrap { display: inline-flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.map-cam { display: inline-flex; gap: 0; flex-wrap: wrap; }
+/* a math label drawn on the map */
+.map-math { position: absolute; left: 12px; top: 10px; z-index: 3; padding: 4px 12px; border-radius: 8px; background: rgba(255,255,255,0.88); box-shadow: 0 1px 6px rgba(20,40,70,0.15); font-size: 26px; color: var(--ink); pointer-events: none; }
 
 /* buttons, selects */
 .reveal button, .reveal select { font: inherit; font-size: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; cursor: pointer; }
@@ -107,6 +108,8 @@
 /* ---------- definitions ---------- */
 .defn { background: var(--wash); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
 .defn-lead { margin: 0 0 6px !important; }
+.defn + .defn { margin-top: 2px; }
+.defn.element { background: var(--paper); }
 .defn dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 0; }
 .defn dt { font-weight: 700; color: var(--accent2); white-space: nowrap; }
 .defn dd { margin: 0; }
