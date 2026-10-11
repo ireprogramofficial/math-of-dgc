@@ -31,8 +31,8 @@
 .reveal p, .reveal li { line-height: 1.3; }
 
 /* ---------- slide layouts ---------- */
-.slide-head { padding-top: 10px; height: 108px; }
-.slide-body { position: absolute; left: 12px; right: 12px; top: 122px; bottom: 14px; display: grid; gap: 16px; }
+.slide-head { padding-top: 10px; height: 80px; }
+.slide-body { position: absolute; left: 12px; right: 12px; top: 94px; bottom: 14px; display: grid; gap: 16px; }
 .slide-body.cols-map-side { grid-template-columns: minmax(0, 1fr) 380px; }
 .side { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden; font-size: 0.68em; }
 .side h3 { font-size: 1.1em; color: var(--accent2); margin-top: 4px; }
@@ -131,3 +131,8 @@
 .steer-pad .pad-W { grid-column: 1; grid-row: 2; }
 .steer-pad .pad-E { grid-column: 3; grid-row: 2; }
 .steer-pad .pad-S { grid-column: 2; grid-row: 3; }
+
+/* legend rows for overlay vectors (e.g. drift and thrust arrows) */
+.rv-legend-item { display: flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--ink); }
+.rv-legend-item svg { flex: none; }
+.rv-legend-item .katex { font-size: 1.05em; }

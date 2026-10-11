@@ -16,7 +16,7 @@ export function create(el) {
   const chip = h('div', { class: 'steer-chip' });
   // on-screen thruster pad (bottom-right of the map): lights up with the thrust actually being applied
   const padBtns = DIRS.map((d, c) => {
-    const b = h('button', { type: 'button', class: `pad pad-${d}`, title: `Thruster ${d} (key ${PAD_KEYS[c]})` }, h('b', {}, d), h('small', {}, PAD_KEYS[c]));
+    const b = h('button', { type: 'button', class: `pad pad-${d}`, title: `Thruster ${d} (key ${PAD_KEYS[c]})` }, d);
     b.addEventListener('pointerdown', (e) => { b.setPointerCapture(e.pointerId); scene.press(c); });
     for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, () => scene.release(c));
     return b;
@@ -25,10 +25,11 @@ export function create(el) {
   stage.append(chip, pad);
 
   const controls = createMapControls(scene.view, { onScenario: (id) => scene.setScenario(id) });
+  scene.view.setLegendItems([
+    { color: COLORS.water, text: 'drift', tex: 'f(x)' },
+    { color: COLORS.thrust, text: 'thrust', tex: 'G(x)\,u' },
+  ]);
   const info = h('div', { class: 'boat-toolbar info' },
-    h('span', { class: 'legend-inline readout' },
-      h('span', {}, h('i', { class: 'swatch', style: { background: COLORS.water } }), 'drift f(x)'),
-      h('span', {}, h('i', { class: 'swatch', style: { background: COLORS.thrust } }), 'input G(x)u')),
     h('span', { class: 'readout' }, `Steer yourself: hold W A S D or the pad. The autopilot resumes after ${MANUAL_HOLD_MS / 1000} s without input.`),
   );
   el.append(stage, info, controls.el);

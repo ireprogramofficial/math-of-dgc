@@ -10,6 +10,7 @@ import { loadFlow } from './flowLoader.js';
 import { ParticleSystem } from './particles.js';
 import { DEFAULT_STYLE, RiverRenderer } from './renderer.js';
 import { getScenario, WORLD } from './scenarios.js';
+import katex from 'katex';
 
 export class RiverView {
   constructor(el, opts = {}) {
@@ -87,9 +88,21 @@ export class RiverView {
     return this.colormap === 'none' ? { streakAlpha: 0.65, widthPx: 1.6 } : { streakAlpha: 0.92 };
   }
 
+  /** Extra legend rows: [{ color, tex, text }] drawn as an arrow plus a (KaTeX) label. */
+  setLegendItems(items) { this.legendItems = items; this._updateLegend(); }
+
+  _legendItemsHTML() {
+    return (this.legendItems ?? []).map((it) => {
+      const label = it.tex ? katex.renderToString(it.tex, { throwOnError: false }) : '';
+      return `<div class="rv-legend-item"><svg width="26" height="10" viewBox="0 0 26 10"><path d="M1 5H19" stroke="${it.color}" stroke-width="3" stroke-linecap="round"/><path d="M25 5L17 0.5V9.5Z" fill="${it.color}"/></svg>${it.text ?? ''} ${label}</div>`;
+    }).join('');
+  }
+
   _updateLegend() {
     if (!this.legend) return;
-    if (this.colormap === 'none' || !this.flow) { this.legend.style.display = 'none'; return; }
+    const items = this._legendItemsHTML();
+    if (!this.flow || (this.colormap === 'none' && !items)) { this.legend.style.display = 'none'; return; }
+    if (this.colormap === 'none') { this.legend.style.display = 'block'; this.legend.innerHTML = items; return; }
     const st = { ...DEFAULT_STYLE, ...this.style };
     const vmax = this.flow.speedRef * st.speedMaxFactor;
     const ticks = [0, 0.25, 0.5, 1, 1.5, 2].filter((v) => v <= vmax + 1e-9);
@@ -97,7 +110,7 @@ export class RiverView {
     this.legend.style.display = 'block';
     this.legend.innerHTML = `<div class="rv-legend-title">Water speed</div>
       <div class="rv-legend-bar" style="background:${colormapCSS(this.colormap)}"></div>
-      <div class="rv-legend-ticks">${ticks.map((v) => `<span style="left:${pos(v)}%">${v}</span>`).join('')}<span class="rv-legend-unit">m/s</span></div>`;
+      <div class="rv-legend-ticks">${ticks.map((v) => `<span style="left:${pos(v)}%">${v}</span>`).join('')}<span class="rv-legend-unit">m/s</span></div>${items}`;
   }
 
   // ---------- camera helpers ----------

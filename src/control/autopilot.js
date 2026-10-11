@@ -50,7 +50,7 @@ export class Autopilot {
   constructor(flow, scenario, model, opts = {}) {
     this.flow = flow;
     this.model = model;
-    this.o = { margin: 16, step: 2, cruise: 2.2, lookahead: 60, holdSeconds: 2.2, arriveRadius: 12, kv: 0.8, minTrip: 250, ...opts };
+    this.o = { margin: 16, step: 2, cruise: 2.6, lookahead: 60, holdSeconds: 2.2, arriveRadius: 12, kv: 0.8, minTrip: 250, ...opts };
     const step = this.o.step;
     this.nx = Math.floor(flow.nx / step);
     this.ny = Math.floor(flow.ny / step);

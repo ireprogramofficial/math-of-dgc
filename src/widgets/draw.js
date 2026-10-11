@@ -20,13 +20,19 @@ export function arrow(ctx, x, y, dx, dy, color, width = 3, head = 8) {
 }
 
 /** The boat hull, pointing along screen angle `ang` (radians, y down). */
-export function boatGlyph(ctx, x, y, ang) {
+export function boatGlyph(ctx, x, y, ang, scale = 1, halo = false) {
   ctx.save();
   ctx.translate(x, y);
+  if (halo) {
+    const g = ctx.createRadialGradient(0, 0, 4 * scale, 0, 0, 22 * scale);
+    g.addColorStop(0, 'rgba(255,255,255,0.75)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 22 * scale, 0, 6.283); ctx.fill();
+  }
   ctx.rotate(ang);
+  ctx.scale(scale, scale);
   ctx.beginPath();
   ctx.moveTo(13, 0); ctx.quadraticCurveTo(5, 6.5, -10, 6); ctx.lineTo(-10, -6); ctx.quadraticCurveTo(5, -6.5, 13, 0); ctx.closePath();
-  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = COLORS.ink; ctx.lineWidth = 2;
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = COLORS.ink; ctx.lineWidth = 2 / scale * Math.max(1, scale * 0.9);
   ctx.shadowColor = 'rgba(20,40,70,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
   ctx.fill(); ctx.shadowColor = 'transparent'; ctx.stroke();
   ctx.restore();

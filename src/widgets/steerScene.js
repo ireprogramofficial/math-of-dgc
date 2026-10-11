@@ -9,7 +9,7 @@ import { RiverView } from '../river/view.js';
 import { arrow, boatGlyph, COLORS } from './draw.js';
 
 export const MANUAL_HOLD_MS = 7000;
-const TIME_SCALE = 25;     // sim seconds per real second: a river crossing takes ~15 s
+const TIME_SCALE = 40;     // sim seconds per real second: a river crossing takes ~10 s
 const MAX_STEP = 0.4;      // sim seconds per integration step
 const TAP_MS = 220;        // a tap (down+up within one frame) still delivers this much thrust
 const KEYS = { w: 0, d: 1, s: 2, a: 3 }; // N, E, S, W
@@ -118,9 +118,9 @@ export class SteerScene {
     // drift f(x) (the water's velocity) and input G(x)u (thrust acceleration)
     const w = this.model.flow.velocity(x[0], x[1], [0, 0]);
     const acc = this.model.thrustAccel(this.u);
-    arrow(ctx, p[0], p[1], w[0] * 30, -w[1] * 30, COLORS.water, 3);
-    arrow(ctx, p[0], p[1], acc[0] * 70, -acc[1] * 70, COLORS.thrust, 4, 9);
-    boatGlyph(ctx, p[0], p[1], this._heading(x));
+    arrow(ctx, p[0], p[1], w[0] * 40, -w[1] * 40, COLORS.water, 3.5, 9);
+    arrow(ctx, p[0], p[1], acc[0] * 90, -acc[1] * 90, COLORS.thrust, 4.5, 10);
+    boatGlyph(ctx, p[0], p[1], this._heading(x), 1.7, true);
     ctx.restore();
   }
 
