@@ -119,7 +119,12 @@ export class SteerScene {
     const w = this.model.flow.velocity(x[0], x[1], [0, 0]);
     const acc = this.model.thrustAccel(this.u);
     arrow(ctx, p[0], p[1], w[0] * 40, -w[1] * 40, COLORS.water, 3.5, 9);
-    arrow(ctx, p[0], p[1], acc[0] * 90, -acc[1] * 90, COLORS.thrust, 4.5, 10);
+    // thrust arrow, mildly exaggerated: it always clears the hull, and small thrusts still read
+    const am = Math.hypot(acc[0], acc[1]);
+    if (am > 1e-3) {
+      const L = 30 + 70 * Math.pow(am / this.model.a, 0.6);
+      arrow(ctx, p[0], p[1], (acc[0] / am) * L, (-acc[1] / am) * L, COLORS.thrust, 4.5, 10);
+    }
     boatGlyph(ctx, p[0], p[1], this._heading(x), 1.7, true);
     ctx.restore();
   }
