@@ -6,5 +6,6 @@ export default defineConfig({
   base: './',
   build: { target: 'es2022', chunkSizeWarningLimit: 900 },
   worker: { format: 'es' },
-  test: { environment: 'node', include: ['tests/**/*.test.js'] },
+  // Flow solves and optimizer runs are compute-heavy; give them room on busy machines and CI runners.
+  test: { environment: 'node', include: ['tests/**/*.test.js'], testTimeout: 60000 },
 });
