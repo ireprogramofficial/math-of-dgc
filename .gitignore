@@ -11,3 +11,7 @@ example-river-flow/
 
 # Claude Code local files
 .claude/settings.local.json
+
+# Reference material for the linear-algebra deck: a DGC variable dump (iReprogram-internal data)
+# and an internal deck. Never commit or publish.
+example-dgc-linear-algebra/

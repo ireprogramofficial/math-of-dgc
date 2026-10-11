@@ -7,6 +7,17 @@ open-loop thrust schedule for a boat on a river.**
 
 Everything runs in the browser. There is no backend, so it deploys as a static site on GitHub Pages.
 
+## Two decks, one site
+
+| Deck | Source | Live URL |
+|---|---|---|
+| The math of DGC (boat on a river) | `index.html`, `src/main.js`, `src/widgets/` | `https://ireprogramofficial.github.io/math-of-dgc/` |
+| The linear algebra of DGC (in progress) | `linear-algebra/index.html`, `src/linear-algebra/` | `https://ireprogramofficial.github.io/math-of-dgc/linear-algebra/` |
+
+Both are entries in `vite.config.js` (`build.rollupOptions.input`), so one build and one Pages deploy publish both. The linear-algebra deck
+reuses `src/styles/deck.css` and adds its own `src/linear-algebra/styles/deck.css`; its widgets go in `src/linear-algebra/widgets/` and are
+registered in `src/linear-algebra/widgets/index.js` (same `create(el)` contract as below). In dev it is at http://localhost:5173/linear-algebra/.
+
 ## Run it
 
 ```bash
@@ -98,3 +109,6 @@ limits so manual steering cannot beach the boat.
 
 `example-river-flow/` holds screenshots of a third party's video, used only as a visual reference for the flow style. It is git-ignored and must not
 be committed or published.
+
+`example-dgc-linear-algebra/` holds iReprogram-internal reference material for the linear-algebra deck (a DGC variable dump and a deck). It is
+git-ignored and must not be committed or published.
