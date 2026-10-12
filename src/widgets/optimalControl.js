@@ -2,7 +2,7 @@
 // For the selected drift model we solve the trajectory optimization problem
 //   min ||x(T) - x_B||  s.t.  x' = f_hat(x) + G u,  x(0) = first sample of basin A's time series,  0 <= u <= 1
 // then run the *same* schedule u on the actual drift. The planned path (what the model predicts) is dashed;
-// the actual outcome is solid. Planning with the actual drift is the baseline.
+// the actual outcome is solid, played after the prediction completes. Planning with the actual drift is the baseline.
 import katex from 'katex';
 import { BoatModel, NU } from '../control/boat.js';
 import { makeDriftData } from '../control/driftFits.js';
@@ -13,8 +13,9 @@ import { boatGlyph, COLORS } from './draw.js';
 import { h } from './ui.js';
 
 const HORIZON = 500;          // seconds
-const PLAY_SECONDS = 10;      // real seconds to play one run
-const HOLD_SECONDS = 2.5;     // pause at the end before replaying
+const PLAY_SECONDS = 7;       // real seconds to play each path
+const GAP_SECONDS = 1.5;      // pause between the predicted path and the real outcome
+const HOLD_SECONDS = 3;       // pause at the end before replaying
 
 const MODES = {
   fit1: { button: 'Plan with fit 1', tex: String.raw`\dot{x} = \hat{f}_1(x) + G\,u`, note: 'Planned with fit 1 (local average), run on the actual drift' },
@@ -57,8 +58,9 @@ export function create(el) {
 
   function showResult() {
     const p = plans[mode];
-    result.textContent = !p || p === 'pending' ? 'Planning…' : `Planned miss ${p.plannedMiss.toFixed(0)} m  ·  actual miss ${p.realMiss.toFixed(0)} m`;
-    result.classList.toggle('bad', !!p && p !== 'pending' && p.realMiss > 25);
+    // the actual miss is only revealed once the real outcome plays (see onDraw)
+    result.textContent = !p || p === 'pending' ? 'Planning…' : `Planned miss ${p.plannedMiss.toFixed(0)} m`;
+    result.classList.remove('bad');
   }
 
   // Solve one plan in short chunks (keeps the page responsive), then run it on the actual drift.
@@ -129,21 +131,31 @@ export function create(el) {
     const p = plans[mode];
     if (p && p !== 'pending') {
       const planned = Array.from({ length: p.planned.length / 4 }, (_, j) => [p.planned[4 * j], p.planned[4 * j + 1]]);
-      path(ctx, planned, 'rgba(255,255,255,0.9)', 5, []);
-      path(ctx, planned, COLORS.thrust, 2.5, [5, 6]);
-      // the actual outcome, drawn up to the playhead
-      const f = Math.min(((performance.now() - t0) / 1000) / PLAY_SECONDS, 1);
-      if ((performance.now() - t0) / 1000 > PLAY_SECONDS + HOLD_SECONDS) t0 = performance.now();
-      const n = Math.max(2, Math.round(f * (p.real.length - 1)) + 1), shown = p.real.slice(0, n);
-      path(ctx, shown, 'rgba(255,255,255,0.9)', 6, []);
-      path(ctx, shown, COLORS.ink, 3, []);
-      // boats: the plan's prediction (orange) and reality (white)
-      const jp = Math.min(Math.round(f * (planned.length - 1)), planned.length - 1);
+      // Sequence: the model's prediction plays to completion, a pause, then the real outcome plays; hold; repeat.
+      let t = (performance.now() - t0) / 1000;
+      if (t > 2 * PLAY_SECONDS + GAP_SECONDS + HOLD_SECONDS) { t0 = performance.now(); t = 0; }
+      const fPlan = Math.min(t / PLAY_SECONDS, 1);
+      const fReal = Math.min(Math.max((t - PLAY_SECONDS - GAP_SECONDS) / PLAY_SECONDS, 0), 1);
       const head = (pts, j) => { const a = pts[Math.max(0, j - 1)], b = pts[j]; return Math.atan2(-(b[1] - a[1]), b[0] - a[0]); };
-      cam.worldToScreen(planned[jp][0], planned[jp][1], q);
-      boatGlyph(ctx, q[0], q[1], head(planned, jp), 1.2, false, COLORS.thrust);
-      cam.worldToScreen(shown[n - 1][0], shown[n - 1][1], q);
-      boatGlyph(ctx, q[0], q[1], head(shown, n - 1), 1.5, true, '#ffffff');
+      const upTo = (pts, f) => pts.slice(0, Math.max(2, Math.round(f * (pts.length - 1)) + 1));
+
+      const shownPlan = upTo(planned, fPlan);
+      path(ctx, shownPlan, 'rgba(255,255,255,0.9)', 5, []);
+      path(ctx, shownPlan, COLORS.thrust, 2.5, [5, 6]);
+      cam.worldToScreen(shownPlan[shownPlan.length - 1][0], shownPlan[shownPlan.length - 1][1], q);
+      boatGlyph(ctx, q[0], q[1], head(shownPlan, shownPlan.length - 1), 1.3, fReal === 0, COLORS.thrust);
+
+      if (fReal > 0) {
+        const shownReal = upTo(p.real, fReal);
+        path(ctx, shownReal, 'rgba(255,255,255,0.9)', 6, []);
+        path(ctx, shownReal, COLORS.ink, 3, []);
+        cam.worldToScreen(shownReal[shownReal.length - 1][0], shownReal[shownReal.length - 1][1], q);
+        boatGlyph(ctx, q[0], q[1], head(shownReal, shownReal.length - 1), 1.5, true, '#ffffff');
+      }
+      result.textContent = fReal === 0
+        ? `Planned miss ${p.plannedMiss.toFixed(0)} m`
+        : `Planned miss ${p.plannedMiss.toFixed(0)} m  ·  actual miss ${p.realMiss.toFixed(0)} m`;
+      result.classList.toggle('bad', fReal > 0 && p.realMiss > 25);
     }
     // start and target
     cam.worldToScreen(data.series[0][0], data.series[0][1], q);
@@ -165,7 +177,7 @@ export function create(el) {
     ctx.restore();
   };
 
-  if (import.meta.env?.DEV) window.__optimal = { view, plans, setMode }; // dev-only debugging hook
+  if (import.meta.env?.DEV) window.__optimal = { view, plans, setMode, seek: (sec) => { t0 = performance.now() - sec * 1000; view.onDraw(view.ctx); } }; // dev-only debugging hook
   return {
     setActive(on) { view.setActive(on); if (on) t0 = performance.now(); },
     destroy: () => { token++; view.destroy(); },
