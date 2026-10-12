@@ -21,7 +21,7 @@ const MODES = {
   hidden: { tex: String.raw`\dot{x} = f(x), \quad f = \textcolor{#c0392b}{?}`, note: '' },
   actual: { button: 'Reveal actual drift', tex: String.raw`\dot{x} = f(x)`, note: 'The actual drift' },
   fit1: { button: 'Fit drift 1', tex: String.raw`\dot{x} = \hat{f}_1(x)`, note: 'Only where there is data; still water everywhere else' },
-  fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x) = A\,x + b`, note: 'One linear model fit to the initial basin, extrapolated everywhere' },
+  fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x) = A\,x`, note: 'One linear model fit to the initial basin, extrapolated everywhere' },
   fit3: { button: 'Fit drift 3', tex: String.raw`\dot{x} = \hat{f}_3(x) = \text{quadratic in } x`, note: 'A richer model fit to the same samples, extrapolated everywhere' },
 };
 
