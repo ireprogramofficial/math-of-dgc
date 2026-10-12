@@ -8,7 +8,7 @@
 // Hover a gene or TAD row to see its partners; hover a column to see the hour.
 import data from '../data/pipeline.json';
 import { setTex } from '../lib/svg.js';
-import { SEC, TAD_COLORS, blend, div, rgb, seq } from '../lib/colors.js';
+import { SEC, TAD_GREYS, blend, div, rgb, seq } from '../lib/colors.js';
 import { rankOneUpdate } from '../lib/linalg.js';
 
 const STAGES = 4;
@@ -192,7 +192,7 @@ export function create(el, { deck } = {}) {
       ctx.globalAlpha = p1 * ghost * gFocus;
       genes.forEach((g, i) => {
         for (let k = 0; k < K; k++) { ctx.fillStyle = gCol[i][k]; ctx.fillRect(G_Z.x + k * cw, G_Z.y + i * gh, cw + 0.4, gh + 0.4); }
-        ctx.fillStyle = TAD_COLORS[g.j]; ctx.fillRect(G_Z.x - 9, G_Z.y + i * gh, 5, gh + 0.4);
+        ctx.fillStyle = TAD_GREYS[g.j % 2]; ctx.fillRect(G_Z.x - 9, G_Z.y + i * gh, 5, gh + 0.4);
       });
       ctx.globalAlpha = 1;
       frame(G_Z, p1 * gFocus);
@@ -232,7 +232,7 @@ export function create(el, { deck } = {}) {
         tads.forEach((t, j) => {
           ctx.globalAlpha = merge;
           for (let k = 0; k < K; k++) { ctx.fillStyle = rgb(blend(eCol[j][k], etCol[j][k], p3)); ctx.fillRect(E_Z.x + k * cw, E_Z.y + j * th, cw + 0.4, th + 0.4); }
-          ctx.fillStyle = TAD_COLORS[j]; ctx.fillRect(E_Z.x - 9, E_Z.y + j * th, 5, th);
+          ctx.fillStyle = TAD_GREYS[j % 2]; ctx.fillRect(E_Z.x - 9, E_Z.y + j * th, 5, th);
           // ē column, which is what centering subtracts
           if (p3 > 0) {
             ctx.globalAlpha = merge * p3;

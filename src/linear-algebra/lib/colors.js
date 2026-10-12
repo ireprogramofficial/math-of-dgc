@@ -14,8 +14,8 @@ export const SEC = {
 // TF colors used by the control and optimization widgets (TF1 magenta, TF2 cyan, TF3 purple, as in the pptx).
 export const TF_COLORS = ['#d6246e', '#0ea5c6', '#7c3aed'];
 
-// Eight distinguishable TAD colors for the gene → TAD strip.
-export const TAD_COLORS = ['#1a5fb4', '#e8501a', '#2e8b57', '#d6246e', '#7c3aed', '#b8860b', '#0ea5c6', '#6b7280'];
+// Two alternating neutral greys mark TAD membership in the gene → TAD strip; adjacent TADs differ.
+export const TAD_GREYS = ['#4b5563', '#b8bfc9'];
 
 const lerp = (a, b, t) => a + (b - a) * t;
 const mix = (c0, c1, t) => [lerp(c0[0], c1[0], t), lerp(c0[1], c1[1], t), lerp(c0[2], c1[2], t)];
