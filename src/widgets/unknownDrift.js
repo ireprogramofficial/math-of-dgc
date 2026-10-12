@@ -1,11 +1,11 @@
 // Slide: unknown drift. The same river as before, but the flow is hidden: all we have are samples.
-//   basin 2: a time series of states that roughly circles the basin's fixed point (the gyre)
-//   basin 1: a single sample
+//   basin B: a time series of states that roughly circles the basin's fixed point (the gyre)
+//   basin A: a single sample
 // The samples come from the true (hidden) flow, with a little measurement jitter.
 // Buttons show the actual drift, or one of three drifts *fitted* to the same samples, each consistent with the data
 // and very different away from it:
-//   fit 1  one linear model  x' = A x + b  fit to basin 2, extrapolated everywhere (as DGC does with its A[k])
-//   fit 2  a kernel average of the sampled velocities: the gyre where there is data, still water everywhere else
+//   fit 1  a kernel average of the sampled velocities: the gyre where there is data, still water everywhere else
+//   fit 2  one linear model  x' = A x + b  fit to basin B, extrapolated everywhere (as DGC does with its A[k])
 //   fit 3  a quadratic polynomial drift (12 parameters) fit by least squares to the same samples: more flexible
 //          than fit 1, equally consistent with the data, and it extrapolates very differently
 // All three use only the samples: no knowledge of the channels, inlet, outlets, or the other basins.
@@ -154,18 +154,18 @@ function fieldFrom(actual, fn) {
 function buildFits(actual, series, dt) {
   const samples = velocitySamples(series, dt);
   const lin = fitLinear(samples), ker = fitKernel(samples), quad = fitQuadratic(samples);
-  const fit1 = fieldFrom(actual, (x, y, o) => lin(x, y, o));
-  const fit2 = fieldFrom(actual, (x, y, o) => ker(x, y, o));
+  const fit1 = fieldFrom(actual, (x, y, o) => ker(x, y, o));
+  const fit2 = fieldFrom(actual, (x, y, o) => lin(x, y, o));
   const fit3 = fieldFrom(actual, (x, y, o) => quad(x, y, o));
-  const residuals = { fit1: fitResidual(lin, samples), fit2: fitResidual(ker, samples), fit3: fitResidual(quad, samples) };
+  const residuals = { fit1: fitResidual(ker, samples), fit2: fitResidual(lin, samples), fit3: fitResidual(quad, samples) };
   return { fit1, fit2, fit3, residuals };
 }
 
 const MODES = {
   hidden: { tex: String.raw`\dot{x} = f(x), \quad f = \textcolor{#c0392b}{?}`, note: '' },
   actual: { button: 'Reveal actual drift', tex: String.raw`\dot{x} = f(x)`, note: 'The actual drift' },
-  fit1: { button: 'Fit drift 1', tex: String.raw`\dot{x} = \hat{f}_1(x) = A\,x + b`, note: 'One linear model fit to basin 2, extrapolated everywhere' },
-  fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x)`, note: 'Only where there is data; still water everywhere else' },
+  fit1: { button: 'Fit drift 1', tex: String.raw`\dot{x} = \hat{f}_1(x)`, note: 'Only where there is data; still water everywhere else' },
+  fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x) = A\,x + b`, note: 'One linear model fit to basin B, extrapolated everywhere' },
   fit3: { button: 'Fit drift 3', tex: String.raw`\dot{x} = \hat{f}_3(x) = \text{quadratic in } x`, note: 'A richer model fit to the same samples, extrapolated everywhere' },
 };
 
@@ -233,9 +233,8 @@ export function create(el) {
       ctx.strokeText(text, p[0], p[1]); ctx.fillText(text, p[0], p[1]);
     };
     const sc = view.scenario.swirls;
-    caption('basin 2: time series', sc[2].x + sc[2].R + 12, sc[2].y);
-    caption('basin 1: one sample', sc[1].x + sc[1].R + 12, sc[1].y);
-    caption('source', sc[0].x - 22, sc[0].y + 4);
+    caption('basin B: time series', sc[2].x + sc[2].R + 12, sc[2].y);
+    caption('basin A: one sample', sc[1].x + sc[1].R + 12, sc[1].y);
     ctx.restore();
   };
 
