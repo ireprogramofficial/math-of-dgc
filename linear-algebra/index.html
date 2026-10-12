@@ -30,7 +30,24 @@
           </div>
         </section>
 
-        <!-- 3 · Terrain: which Active data types become which DGC arrays -->
+        <!-- 3 · Terrain: the DGC problem and its difference equation, as arrays -->
+        <section data-sec="terrain" data-label="Terrain · Dynamics">
+          <h2 class="la-h">The difference equation, as arrays</h2>
+          <div class="la-body la-cols de-cols">
+            <div class="de-problem">
+              $$\begin{aligned}
+                \min_{u \in \mathbb{R}^{M \times K}} \quad & \bigl\| \, x[K] - \textcolor{#1a5fb4}{x_{\text{target}}} \, \bigr\|_2 \\
+                \text{s.t.} \quad & x[k+1] = \textcolor{#1a5fb4}{A[k]}\, x[k] + \textcolor{#e8501a}{B_R}\, u[k] \\
+                & u[k] \ge 0 \\
+                & x[0] = \textcolor{#1a5fb4}{x_{\text{initial}}}, \quad x[K] \text{ free}
+              \end{aligned}$$
+              <p class="la-note">Blue terms come from the time-series data, orange from the regulation network. The second line, the difference equation, is drawn on the right.</p>
+            </div>
+            <div class="la-fill" data-widget="diffeq"></div>
+          </div>
+        </section>
+
+        <!-- 4 · Terrain: which Active data types become which DGC arrays -->
         <section data-sec="terrain" data-label="Terrain · Data">
           <h2 class="la-h">From data to arrays</h2>
           <div class="la-body">
@@ -38,7 +55,7 @@
           </div>
         </section>
 
-        <!-- 4 · Terrain: data → TADs → A_k (stages advance with the arrow keys) -->
+        <!-- 5 · Terrain: data → TADs → A_k (stages advance with the arrow keys) -->
         <section data-sec="terrain" data-label="Terrain · Data → Fit">
           <h2 class="la-h">From measurements to transition matrices</h2>
           <div class="la-body">
@@ -47,7 +64,7 @@
           <span class="fragment la-step"></span><span class="fragment la-step"></span><span class="fragment la-step"></span><span class="fragment la-step"></span>
         </section>
 
-        <!-- 5 · Optimization: the reachable cone and NNLS -->
+        <!-- 6 · Optimization: the reachable cone and NNLS -->
         <section data-sec="optimization" data-label="Optimization · Solve" data-prevent-swipe>
           <h2 class="la-h">The reachable set, and the closest endpoint</h2>
           <div class="la-body">

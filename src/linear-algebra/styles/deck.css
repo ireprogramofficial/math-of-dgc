@@ -199,3 +199,28 @@
 .vr-split { display: flex; height: 16px; border: 1px solid var(--la-ink); font-size: 11px; line-height: 14px; color: #fff; text-align: center; }
 .vr-split .one { background: var(--terrain); }
 .vr-split .zero { flex: 1; background: #fff; color: var(--la-ink); }
+
+/* ---------- difference-equation widget ---------- */
+.la-body.de-cols { grid-template-columns: 430px minmax(0, 1fr); }
+.de-problem { font-size: 22px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.de-problem .katex-display { margin: 0; }
+.de-problem .la-note { color: var(--la-muted); font-size: 16px; margin: 0; }
+.de-widget { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 70px; }
+.de-row { display: flex; align-items: center; justify-content: center; gap: 14px; padding-right: 40px; }
+.de-op { font: 34px "Cambria Math", "Times New Roman", serif; margin-top: -10px; }
+.de-term { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto auto; column-gap: 6px; align-items: center; justify-items: center; transition: opacity 0.2s; }
+.de-top { grid-column: 2; grid-row: 1; min-height: 34px; font-size: 13px; color: var(--la-muted); text-align: center; line-height: 1.2; }
+.de-side { grid-column: 1; grid-row: 2; font-size: 13px; color: var(--la-muted); text-align: right; line-height: 1.2; }
+.de-x0 .de-side, .de-u .de-side { display: none; }
+.de-shape { grid-column: 2; grid-row: 2; }
+.de-sym { grid-column: 2; grid-row: 3; font-size: 22px; margin-top: 6px; white-space: nowrap; }
+.de-box { fill: #fff; stroke: var(--la-ink); stroke-width: 1.6; }
+.de-term[style*="--c"] .de-box { fill: color-mix(in srgb, var(--c) 10%, white); stroke: var(--c); stroke-width: 2.2; }
+.de-rule { stroke: var(--la-ink); stroke-width: 1.1; opacity: 0.6; }
+.de-focus .de-term { opacity: 0.3; }
+.de-focus .de-term.on { opacity: 1; }
+.de-brackets { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.de-bracket { fill: none; stroke: var(--la-muted); stroke-width: 1.5; }
+.de-bracket-text { font: 13px Arial, sans-serif; fill: var(--la-muted); text-anchor: middle; }
+.de-note { min-height: 52px; padding: 10px 14px; background: var(--la-wash); border-left: 4px solid var(--terrain); font-size: 18px; line-height: 1.3; }
+.de-note .dim { color: var(--la-muted); }
