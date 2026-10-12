@@ -2,7 +2,8 @@
 import { DIRS } from '../control/boat.js';
 import { COLORS } from './draw.js';
 import { createMapControls } from './mapControls.js';
-import { createStateReadout } from './stateReadout.js';
+import katex from 'katex';
+import { createInputReadout, createStateReadout } from './stateReadout.js';
 import { SteerScene } from './steerScene.js';
 import { h } from './ui.js';
 
@@ -23,8 +24,14 @@ export function create(el) {
     return b;
   });
   const pad = h('div', { class: 'steer-pad', 'data-prevent-swipe': '' }, ...padBtns);
-  stage.append(chip, pad);
-  const readout = createStateReadout(stage);
+  // the dynamics, labeled on the map (top-left), like the dynamical-system slide
+  const label = h('div', { class: 'map-math' });
+  label.innerHTML = katex.renderToString(String.raw`\dot{x} = f(x) + G(x)\,u(t)`, { throwOnError: false });
+  // live input u and state x side by side (top-right)
+  const readouts = h('div', { class: 'map-readouts' });
+  stage.append(label, chip, pad, readouts);
+  const uReadout = createInputReadout(readouts);
+  const readout = createStateReadout(readouts);
 
   const controls = createMapControls(scene.view, { onScenario: (id) => scene.setScenario(id) });
   scene.view.setLegendItems([
@@ -36,6 +43,7 @@ export function create(el) {
   let lastMode = '', lastText = '';
   function update({ mode, secondsLeft, u, holding }) {
     padBtns.forEach((b, c) => b.style.setProperty('--u', u[c].toFixed(2)));
+    uReadout.set(u);
     readout.set(scene.boat.x);
     if (mode !== lastMode) { chip.dataset.mode = mode; lastMode = mode; }
     const text = mode === 'manual' ? `Manual steering · autopilot resumes in ${Math.ceil(secondsLeft)} s` : holding ? 'Autopilot · arrived, pausing' : 'Autopilot · steering to a new point';
