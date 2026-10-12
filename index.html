@@ -133,7 +133,33 @@
           </div>
         </section>
 
-        <!-- 6 · The DGC problem P(R) and the data it relies on (from dgc-problem-statement-slide.pptx, slide 3) -->
+        <!-- 6 · Key challenge: unknown drift -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">Key challenge</div>
+            <h2>Unknown drift?</h2>
+          </div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="unknown"></div>
+            <div class="side">
+              <div class="defn">
+                <p class="defn-lead">A <b>dynamical system</b> is a pair \((X, f)\):</p>
+                <dl>
+                  <dt>State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
+                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is the drift, <b class="unknown">unknown</b></dd>
+                </dl>
+              </div>
+              <div class="defn element">
+                <dl>
+                  <dt>Data</dt><dd>Basin 2: a time series \(x(t_0), x(t_1), \dots, x(t_N)\)<br>Basin 1: a single sample</dd>
+                </dl>
+              </div>
+              <p class="takeaway">In cell reprogramming we only get glimpses of how the system behaves naturally.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7 · The DGC problem P(R) and the data it relies on (from dgc-problem-statement-slide.pptx, slide 3) -->
         <section class="dgc-slide">
           <div class="dgc-wrap">
           <div class="dgc-problem">

@@ -206,8 +206,8 @@ const triangle = {
   sinks: [rimPatch(TRI.b1, 22), rimPatch(TRI.b2, 22)],
   swirls: [
     { x: TRI.src.x, y: TRI.src.y, R: TRI.r, r0: 60, V: 0.9, dir: 1 },
-    { x: TRI.b1.x, y: TRI.b1.y, R: TRI.r, r0: 55, V: 0.6, dir: -1 },
-    { x: TRI.b2.x, y: TRI.b2.y, R: TRI.r, r0: 55, V: 0.6, dir: 1 },
+    { x: TRI.b1.x, y: TRI.b1.y, R: TRI.r, r0: 70, V: 1.2, dir: -1 },
+    { x: TRI.b2.x, y: TRI.b2.y, R: TRI.r, r0: 70, V: 1.2, dir: 1 },
   ],
   speedRef: 1.1,
   boat: { start: [TRI.src.x, TRI.src.y], target: [TRI.b1.x, TRI.b1.y], horizon: 560 },

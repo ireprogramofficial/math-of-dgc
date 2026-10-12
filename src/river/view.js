@@ -94,6 +94,9 @@ export class RiverView {
     return this.colormap === 'none' ? { streakAlpha: 0.65, widthPx: 1.6 } : { streakAlpha: 0.92 };
   }
 
+  /** Hide (or show) everything that reveals the drift: streaks, speed colors, streamlines, legend. */
+  setFlowHidden(hidden) { this.flowHidden = hidden; this._updateLegend(); }
+
   /** Extra legend rows: [{ color, tex, text }] drawn as an arrow plus a (KaTeX) label. */
   setLegendItems(items) { this.legendItems = items; this._updateLegend(); }
 
@@ -110,7 +113,7 @@ export class RiverView {
   _updateLegend() {
     if (!this.legend) return;
     const items = this._legendItemsHTML();
-    if (!this.flow || (this.colormap === 'none' && !items)) { this.legend.style.display = 'none'; return; }
+    if (!this.flow || this.flowHidden || (this.colormap === 'none' && !items)) { this.legend.style.display = 'none'; return; }
     if (this.colormap === 'none') { this.legend.style.display = 'block'; this.legend.innerHTML = items; return; }
     const st = { ...DEFAULT_STYLE, ...this.style };
     const vmax = this.flow.speedRef * st.speedMaxFactor;
@@ -186,10 +189,11 @@ export class RiverView {
     if (Math.abs(rect.width - this._rectW) > 0.5 || this.glCanvas.width === 0) this._resize();
     if (!this.flow) return;
     this.camera.update(now);
-    const count = this.particles.update(dt, this.camera);
+    const hidden = this.flowHidden;
+    const count = hidden ? 0 : this.particles.update(dt, this.camera);
     this.renderer.render({
       camera: this.camera, k: this.k, particles: this.particles.data, count,
-      style: { ...this._streakStyle(), ...this.style },
+      style: { ...this._streakStyle(), ...this.style, hideFlow: hidden },
     });
     this._drawOverlay(now, dt);
   }

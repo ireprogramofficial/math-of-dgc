@@ -18,7 +18,9 @@ describe('flow solver', () => {
       console.log(`${scn.id}: ${ms.toFixed(0)} ms, iters=${stats.iterations}, resid=${stats.residual.toExponential(1)}, water=${(100 * water / flow.u.length).toFixed(1)}%, p95=${p95.toFixed(2)}, max=${speeds.at(-1).toFixed(2)}`);
       expect(water).toBeGreaterThan(1000);
       expect(p95).toBeGreaterThan(0.8 * scn.speedRef);
-      expect(p95).toBeLessThan(1.2 * scn.speedRef);
+      // swirls (gyres) are added on top of the normalized through-flow, so they can raise the upper tail
+      const swirlV = Math.max(0, ...(scn.swirls ?? []).map((w) => w.V));
+      expect(p95).toBeLessThan(1.2 * scn.speedRef + swirlV);
       if (scn.type !== 'analytic') expect(stats.residual).toBeLessThan(5e-5);
       expect(Number.isFinite(speeds.at(-1))).toBe(true);
     });

@@ -264,7 +264,7 @@ export class RiverRenderer {
     gl.uniform1f(u.uZoom, zoom);
     gl.uniform1f(u.uSpeedMax, flow.speedRef * st.speedMaxFactor);
     gl.uniform1f(u.uGamma, st.gamma);
-    gl.uniform1f(u.uCmapMix, this.colormap === 'none' ? 0 : st.cmapMix);
+    gl.uniform1f(u.uCmapMix, this.colormap === 'none' || st.hideFlow ? 0 : st.cmapMix);
     gl.uniform3fv(u.uLand, st.land);
     gl.uniform3fv(u.uWater, st.water);
     gl.uniform3fv(u.uShore, st.shore);
@@ -272,7 +272,7 @@ export class RiverRenderer {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // --- static streamlines (the rails the streaks ride on)
-    if (this.lineCount) {
+    if (this.lineCount && !st.hideFlow) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.useProgram(this.lines.p);

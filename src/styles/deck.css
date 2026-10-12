@@ -188,3 +188,5 @@
 .map-readouts .state-readout { position: static; }
 /* on the control-system slide the math label takes the top-left, so the status chip sits under it */
 .steer-widget .steer-chip { top: 62px; }
+
+.unknown { color: var(--bad); }
