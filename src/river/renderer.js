@@ -115,6 +115,21 @@ void main() {
   vSide = side;
 }`;
 
+// Streamlines: fixed world-space line segments, drawn between the water and the streaks.
+const LINE_VERT = `#version 300 es
+in vec2 aPos;
+uniform vec2 uCenter;
+uniform vec2 uRes;
+uniform float uZoom;
+uniform vec2 uOffset; // device px, to fake line width (WebGL lines are 1 device px)
+void main() { gl_Position = vec4(((aPos - uCenter) * uZoom + uOffset) / (0.5 * uRes), 0.0, 1.0); }`;
+
+const LINE_FRAG = `#version 300 es
+precision mediump float;
+uniform vec4 uColor;
+out vec4 outColor;
+void main() { outColor = uColor; }`;
+
 const STREAK_FRAG = `#version 300 es
 precision mediump float;
 in float vAlpha;
@@ -168,6 +183,16 @@ export class RiverRenderer {
     this.canvas = canvas;
     this.bg = program(gl, BG_VERT, BG_FRAG);
     this.streak = program(gl, STREAK_VERT, STREAK_FRAG);
+    this.lines = program(gl, LINE_VERT, LINE_FRAG);
+    this.lineVao = gl.createVertexArray();
+    this.lineBuf = gl.createBuffer();
+    this.lineCount = 0;
+    gl.bindVertexArray(this.lineVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuf);
+    const lineLoc = gl.getAttribLocation(this.lines.p, 'aPos');
+    gl.enableVertexAttribArray(lineLoc);
+    gl.vertexAttribPointer(lineLoc, 2, gl.FLOAT, false, 8, 0);
+    gl.bindVertexArray(null);
     this.emptyVao = gl.createVertexArray();
 
     this.streakVao = gl.createVertexArray();
@@ -196,6 +221,14 @@ export class RiverRenderer {
     for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) {
       gl.texParameteri(gl.TEXTURE_2D, k, v);
     }
+  }
+
+  /** Static streamlines as segment pairs [x0, y0, x1, y1, ...] in world meters (empty array to clear). */
+  setStreamlines(segs) {
+    const gl = this.gl;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, segs, gl.STATIC_DRAW);
+    this.lineCount = segs.length / 2;
   }
 
   setColormap(name) {
@@ -237,6 +270,26 @@ export class RiverRenderer {
     gl.uniform3fv(u.uShore, st.shore);
     gl.bindVertexArray(this.emptyVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    // --- static streamlines (the rails the streaks ride on)
+    if (this.lineCount) {
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.useProgram(this.lines.p);
+      gl.uniform2f(this.lines.u.uCenter, camera.cx, camera.cy);
+      gl.uniform2f(this.lines.u.uRes, W, H);
+      gl.uniform1f(this.lines.u.uZoom, zoom);
+      gl.uniform4fv(this.lines.u.uColor, this.colormap === 'none' ? [0.09, 0.16, 0.24, 0.2] : [1, 1, 1, 0.26]);
+      gl.bindVertexArray(this.lineVao);
+      // ~1.3 layout px wide on any display: overlapping 1-device-px passes
+      const w = Math.max(1, Math.round(1.3 * k));
+      for (let i = 0; i < w; i++) {
+        const o = i - (w - 1) / 2;
+        gl.uniform2f(this.lines.u.uOffset, o * 0.7, o * 0.7);
+        gl.drawArrays(gl.LINES, 0, this.lineCount);
+      }
+      gl.disable(gl.BLEND);
+    }
 
     // --- streaks
     if (count > 0) {

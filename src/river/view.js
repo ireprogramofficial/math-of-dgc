@@ -11,6 +11,11 @@ import { ParticleSystem } from './particles.js';
 import { DEFAULT_STYLE, RiverRenderer } from './renderer.js';
 import { getScenario, WORLD } from './scenarios.js';
 import katex from 'katex';
+import { computeStreamlines } from './streamlines.js';
+
+// Faint static streamlines under the moving streaks, a cue that the flow is deterministic.
+// Set to false to turn them off everywhere.
+const SHOW_STREAMLINES = true;
 
 export class RiverView {
   constructor(el, opts = {}) {
@@ -69,6 +74,7 @@ export class RiverView {
     if (token !== this._token) return; // superseded
     this.flow = flow;
     this.renderer.setFlow(flow);
+    this.renderer.setStreamlines(SHOW_STREAMLINES && this.opts.streamlines !== false ? computeStreamlines(flow) : new Float32Array(0));
     if (this.particles) this.particles.setFlow(flow);
     else this.particles = new ParticleSystem(flow, { density: this.opts.density ?? 0.0075 });
     this.camera.set(view ?? this._homeView());
