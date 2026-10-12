@@ -1,7 +1,7 @@
 // Open-loop deterministic trajectory optimization for the boat.
 //
 //   minimize over U in [0, umax]^(N x 4), with disabled thrusters pinned to 0:
-//     J(U) = 1/2 (x_M - x*)' Q (x_M - x*)                       terminal miss (position, and a little velocity)
+//     J(U) = qPos/2 |x_M - x*|^2                                 terminal miss
 //          + sum_k dt ( rho/2 |u_k|^2 + rho1 * 1'u_k )           effort (quadratic + fuel-like linear)
 //          + sum_j h  kappa/2 max(0, margin - inside(p_j))^2     stay in the water (soft bank penalty)
 //     subject to x_{j+1} = Phi(x_j, u_k)   (RK4 of x' = f(x) + G u)
@@ -11,11 +11,10 @@
 // The solver is accelerated projected gradient (FISTA) with backtracking and adaptive restart: simple, convex-style
 // machinery that is reliable for box constraints, and cheap enough to animate in the browser.
 
-import { NU } from './boat.js';
+import { NU, NX } from './boat.js';
 
 export const DEFAULT_WEIGHTS = {
   qPos: 1,         // 1/m^2-scaled terminal position weight
-  qVel: 0.05,      // terminal velocity weight
   rho: 20,         // quadratic effort
   rho1: 0,         // linear (fuel-like) effort
   kappa: 0.5,      // land penalty strength
@@ -27,13 +26,14 @@ export function makeProblem(model, scenario, overrides = {}) {
   return {
     model,
     x0: model.initialState(start),
-    target: Float64Array.of(target[0], target[1], 0, 0),
+    target: Float64Array.of(target[0], target[1]),
     N: overrides.N ?? 60,
     sub: overrides.sub ?? 5,
     T: overrides.T ?? horizon,
     enabled: overrides.enabled ?? [true, true, true, true],
     umax: 1,
     weights: { ...DEFAULT_WEIGHTS, ...(overrides.weights ?? {}) },
+    scenario,
   };
 }
 
@@ -51,11 +51,9 @@ export function evaluate(problem, U, wantGrad = false) {
   const { model, x0, target, N, sub, T, weights: w } = problem;
   const { X, A, B, M, h } = model.rollout(x0, U, { N, sub, T }, wantGrad);
   const flow = model.flow, dtU = T / N;
-  const Q = [w.qPos, w.qPos, w.qVel, w.qVel];
-
-  const e = new Float64Array(4);
+  const e = new Float64Array(NX);
   let terminal = 0;
-  for (let i = 0; i < 4; i++) { e[i] = X[4 * M + i] - target[i]; terminal += 0.5 * Q[i] * e[i] * e[i]; }
+  for (let i = 0; i < NX; i++) { e[i] = X[NX * M + i] - target[i]; terminal += 0.5 * w.qPos * e[i] * e[i]; }
 
   let effort = 0;
   for (let k = 0; k < N; k++) {
@@ -69,7 +67,7 @@ export function evaluate(problem, U, wantGrad = false) {
   let land = 0;
   const landGrad = wantGrad ? new Float64Array((M + 1) * 2) : null;
   for (let j = 1; j <= M; j++) {
-    flow.insideAndGrad(X[4 * j], X[4 * j + 1], g3);
+    flow.insideAndGrad(X[NX * j], X[NX * j + 1], g3);
     const pen = Math.max(0, w.margin - g3[0]);
     if (pen > 0) {
       land += 0.5 * w.kappa * pen * pen * h;
@@ -82,20 +80,20 @@ export function evaluate(problem, U, wantGrad = false) {
   if (!wantGrad) return out;
 
   const grad = new Float64Array(N * NU);
-  const lam = new Float64Array(4), nl = new Float64Array(4);
-  for (let i = 0; i < 4; i++) lam[i] = Q[i] * e[i];
+  const lam = new Float64Array(NX), nl = new Float64Array(NX);
+  for (let i = 0; i < NX; i++) lam[i] = w.qPos * e[i];
   lam[0] += landGrad[2 * M]; lam[1] += landGrad[2 * M + 1];
   for (let j = M - 1; j >= 0; j--) {
-    const k = Math.floor(j / sub), b = 16 * j;
+    const k = Math.floor(j / sub), a = 4 * j, b = 8 * j; // A_j is 2x2, B_j is 2x4 (row-major)
     for (let c = 0; c < NU; c++) {
       let s = 0;
-      for (let r = 0; r < 4; r++) s += B[b + 4 * r + c] * lam[r];
-      grad[4 * k + c] += s;
+      for (let r = 0; r < NX; r++) s += B[b + NU * r + c] * lam[r];
+      grad[NU * k + c] += s;
     }
     if (j === 0) break;
-    for (let c = 0; c < 4; c++) {
+    for (let c = 0; c < NX; c++) {
       let s = 0;
-      for (let r = 0; r < 4; r++) s += A[b + 4 * r + c] * lam[r];
+      for (let r = 0; r < NX; r++) s += A[a + NX * r + c] * lam[r];
       nl[c] = s;
     }
     nl[0] += landGrad[2 * j]; nl[1] += landGrad[2 * j + 1];
@@ -107,8 +105,16 @@ export function evaluate(problem, U, wantGrad = false) {
 }
 
 export class TrajectoryOptimizer {
-  constructor(problem, U0 = null) {
+  /**
+   * @param {object} problem from makeProblem
+   * @param {Float64Array|null} U0 starting schedule (default: zero thrust)
+   * @param {object} opts fallback: () => U, a second starting schedule to restart from (once) if the first run
+   *   converges with the target still more than `fallbackMiss` meters away, i.e. in a poor local minimum
+   */
+  constructor(problem, U0 = null, { fallback = null, fallbackMiss = 25 } = {}) {
     this.problem = problem;
+    this.fallback = fallback;
+    this.fallbackMiss = fallbackMiss;
     const n = problem.N * NU;
     this.U = project(U0 ? Float64Array.from(U0) : new Float64Array(n), problem);
     this.Y = Float64Array.from(this.U);
@@ -165,5 +171,23 @@ export class TrajectoryOptimizer {
     const k = this.history.length;
     const stalled = k > 30 && Math.abs(this.history[k - 30] - fNew.J) < 1e-7 * Math.max(1, Math.abs(fNew.J));
     if (this.gmap < 1e-6 || stalled || (improvement >= 0 && improvement < 1e-12 && this.iter > 5)) this.done = true;
+    if (this.done && this.fallback && this.last.miss > this.fallbackMiss) this._restart(this.fallback());
+    if (this.done) this._best();
+  }
+
+  /** Start again from schedule U, keeping the better of the two results at the end. */
+  _restart(U) {
+    const first = { U: this.U, last: this.last };
+    this.fallback = null;
+    this.U = project(Float64Array.from(U), this.problem);
+    this.Y = Float64Array.from(this.U);
+    this.t = 1e-2; this.tk = 1; this.history = []; this.done = false;
+    this.last = evaluate(this.problem, this.U, false);
+    this._first = first;
+  }
+
+  /** After a restart, the result to use: the second run's, unless the first was better. */
+  _best() {
+    if (this.done && this._first && this._first.last.J < this.last.J) { this.U = this._first.U; this.last = this._first.last; this._first = null; }
   }
 }

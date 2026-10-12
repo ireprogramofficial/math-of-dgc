@@ -66,9 +66,9 @@ export function createBoatWidget(el, cfg) {
   );
   const toolbar = h('div', { class: 'toolbars' }, controls, info);
   scene.view.setLegendItems([
-    { color: COLORS.water, text: 'water velocity' },
-    { color: COLORS.thrust, text: 'thrust' },
-    { color: COLORS.ink, text: 'boat velocity' },
+    { color: COLORS.water, text: 'drift', tex: 'f(x)' },
+    { color: COLORS.thrust, text: 'thrust', tex: 'G(x)\\,u' },
+    { color: COLORS.ink, text: 'boat velocity', tex: '\\dot{x}' },
     { color: COLORS.ink, text: 'drift-only path', dash: true },
   ]);
 

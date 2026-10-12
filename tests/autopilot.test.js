@@ -21,7 +21,7 @@ function fly(id, simSeconds = 5000, h = 0.4) {
     if (holding && !wasHolding) arrivals++;
     wasHolding = holding;
     minInside = Math.min(minInside, flow.insideAt(boat.x[0], boat.x[1]));
-    maxSpeed = Math.max(maxSpeed, Math.hypot(boat.x[2], boat.x[3]));
+    maxSpeed = Math.max(maxSpeed, Math.hypot(boat.v[0], boat.v[1]));
   }
   return { arrivals, minInside, goals: goals.size, maxSpeed };
 }

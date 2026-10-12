@@ -61,12 +61,14 @@ textbook-generic definitions are used on the slides).
 ### The model
 
 ```
-state    x = (px, py, vx, vy)
+state    x = (px, py)                              position (first order: no inertia)
 input    u = (uN, uE, uS, uW) in [0,1]^4          four thrusters, none can pull backward
 dynamics x' = f(x) + G u                           control-affine
-         f(x) = ( v , -c (v - w(p)) )              the river drags the boat toward the local water velocity w(p)
-         G    = [ 0 ; a E ]                         constant; E maps thrusters to (east, north) acceleration
+         f(x) = w(x)                               the drift is the local water velocity
+         G    = s E                                constant; E maps thrusters to (east, north), s = 3 m/s at full thrust
 ```
+
+The drawn river is therefore exactly the drift f, and a trajectory with no thrust is a streamline of the map.
 
 The schedule is piecewise constant over 60 intervals. Each interval is integrated with RK4 sub-steps, and the
 integrator also carries the sensitivities `A_j = dx_{j+1}/dx_j` and `B_j = dx_{j+1}/du`: the discrete-time
@@ -74,11 +76,13 @@ linear-time-varying system linearized about a trajectory. That is the bridge to 
 
 The optimizer minimizes terminal miss + effort + a soft bank penalty with accelerated projected gradient
 (FISTA, backtracking, adaptive restart), using an exact adjoint gradient. It converges in 0.1 to 1 s in the browser.
+If a solve from zero thrust stalls far from the target (a local minimum, e.g. the wrong branch of a fork), it restarts
+once from the autopilot's recorded thrust (`src/control/warmStart.js`).
 
 ### The autopilot (`src/control/autopilot.js`)
 
 Picks a destination far from the boat, plans a path over the free water with A* (preferring mid-channel), and follows it with pure pursuit that only aims at
-points visible over open water (so it cannot cut corners across land). A velocity-tracking law `a = kv (v_des - v) + c (v - w)` turns that into thruster
+points visible over open water (so it cannot cut corners across land). Setting `G u = v_des - w` (cancel the current, add the desired velocity) turns that into thruster
 fractions, so the boat also holds station against the current while it pauses. It detects stalls and re-plans. `LiveBoat` enforces the banks as hard
 limits so manual steering cannot beach the boat.
 

@@ -5,16 +5,17 @@
 // the closed-loop boat corrects. Then the run repeats.
 
 import { Autopilot } from '../control/autopilot.js';
-import { BoatModel, NU } from '../control/boat.js';
+import { BoatModel, NU, NX } from '../control/boat.js';
 import { LiveBoat } from '../control/liveBoat.js';
 import { evaluate, makeProblem, TrajectoryOptimizer } from '../control/optimizer.js';
+import { autopilotGuess } from '../control/warmStart.js';
 import { RiverView } from '../river/view.js';
 import { arrow, boatGlyph, COLORS } from './draw.js';
 import { createMapControls } from './mapControls.js';
 import { h } from './ui.js';
 
 const TIME_SCALE = 35;        // sim seconds per real second
-const GUST = { at: 0.3, duration: 40, accel: 0.55 }; // fraction of horizon, sim seconds, m/s^2
+const GUST = { at: 0.3, duration: 40, speed: 2 }; // fraction of horizon, sim seconds, m/s of sideways push
 const LINGER = 0.3;           // extra fraction of the horizon to watch after the plan ends
 
 export function create(el) {
@@ -42,7 +43,7 @@ export function create(el) {
     st.ready = false;
     st.model = new BoatModel(flow);
     st.problem = makeProblem(st.model, scn);
-    const opt = new TrajectoryOptimizer(st.problem);
+    const problem = st.problem, opt = new TrajectoryOptimizer(problem, null, { fallback: () => autopilotGuess(problem, scn) });
     const step = () => {
       if (my !== token) return;
       const t0 = performance.now();
@@ -50,7 +51,7 @@ export function create(el) {
       if (!opt.done) { setTimeout(step, 0); return; }
       st.U = Float64Array.from(opt.U);
       st.planned = evaluate(st.problem, st.U).X;
-      st.M = st.planned.length / 4 - 1;
+      st.M = st.planned.length / NX - 1;
       reset();
       st.ready = true;
     };
@@ -75,7 +76,7 @@ export function create(el) {
     let nx = -w[1], ny = w[0];
     const m = Math.hypot(nx, ny) || 1; nx /= m; ny /= m;
     if (f.insideAt(x[0] - 40 * nx, x[1] - 40 * ny) > f.insideAt(x[0] + 40 * nx, x[1] + 40 * ny)) { nx = -nx; ny = -ny; }
-    st.gust = { left: GUST.duration, ax: GUST.accel * nx, ay: GUST.accel * ny };
+    st.gust = { left: GUST.duration, vx: GUST.speed * nx, vy: GUST.speed * ny };
   }
   gustBtn.addEventListener('click', startGust);
   againBtn.addEventListener('click', () => { if (st.ready) reset(); });
@@ -92,7 +93,7 @@ export function create(el) {
       st.ol.step(u, st.h);
       st.cl.step(st.pilot.control(st.cl.x, st.h), st.h);
       if (st.gust) {
-        for (const b of [st.ol, st.cl]) { b.x[2] += st.gust.ax * st.h; b.x[3] += st.gust.ay * st.h; b.constrain(); }
+        for (const b of [st.ol, st.cl]) b.push(st.gust.vx * st.h, st.gust.vy * st.h);
         st.gust.left -= st.h;
         if (st.gust.left <= 0) st.gust = null;
       }
@@ -121,8 +122,8 @@ export function create(el) {
 
     // the open-loop plan, as computed in advance
     const planIdx = Array.from({ length: st.M + 1 }, (_, j) => j);
-    line(ctx, planIdx, (j) => [P[4 * j], P[4 * j + 1]], 'rgba(255,255,255,0.9)', 5);
-    line(ctx, planIdx, (j) => [P[4 * j], P[4 * j + 1]], COLORS.open, 2, [3, 6]);
+    line(ctx, planIdx, (j) => [P[NX * j], P[NX * j + 1]], 'rgba(255,255,255,0.9)', 5);
+    line(ctx, planIdx, (j) => [P[NX * j], P[NX * j + 1]], COLORS.open, 2, [3, 6]);
 
     // trails
     st.trails.forEach((tr, i) => {
@@ -140,16 +141,16 @@ export function create(el) {
     // boats (and the gust pushing them)
     [st.ol, st.cl].forEach((b, i) => {
       const p = cam.worldToScreen(b.x[0], b.x[1], [0, 0]);
-      if (st.gust) arrow(ctx, p[0], p[1], st.gust.ax * 110, -st.gust.ay * 110, 'rgba(22,40,61,0.55)', 5, 12);
-      const sp = Math.hypot(b.x[2], b.x[3]);
-      b._ang = sp > 0.15 ? Math.atan2(-b.x[3], b.x[2]) : b._ang ?? 0;
+      if (st.gust) arrow(ctx, p[0], p[1], st.gust.vx * 30, -st.gust.vy * 30, 'rgba(22,40,61,0.55)', 5, 12);
+      const sp = Math.hypot(b.v[0], b.v[1]);
+      b._ang = sp > 0.15 ? Math.atan2(-b.v[1], b.v[0]) : b._ang ?? 0;
       boatGlyph(ctx, p[0], p[1], b._ang, 1.5, true, i ? COLORS.closed : COLORS.open);
     });
     if (st.gust) {
       const p = cam.worldToScreen(st.ol.x[0], st.ol.x[1], [0, 0]);
       ctx.font = '700 14px "Source Sans Pro", system-ui, sans-serif'; ctx.textAlign = 'center';
       ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.fillStyle = COLORS.ink;
-      const lx = p[0] + st.gust.ax * 130, ly = p[1] - st.gust.ay * 130 - 6;
+      const lx = p[0] + st.gust.vx * 36, ly = p[1] - st.gust.vy * 36 - 6;
       ctx.strokeText('gust', lx, ly); ctx.fillText('gust', lx, ly);
     }
     ctx.restore();

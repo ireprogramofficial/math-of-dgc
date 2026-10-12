@@ -1,13 +1,13 @@
 // A feedback autopilot for the boat: it picks a destination in the water, plans a path with A*, and follows
-// it with pure pursuit plus a velocity-tracking controller. When it arrives it holds position for a moment,
-// then picks somewhere new. It is a *closed-loop* controller (thrust depends on the current state), in contrast
-// to the open-loop schedules elsewhere in the deck.
+// it with pure pursuit. When it arrives it holds position for a moment, then picks somewhere new. It is a
+// *closed-loop* controller (thrust depends on the current state), in contrast to the open-loop schedules
+// elsewhere in the deck.
 //
-// Control law (v = boat velocity, w = water velocity, a = max thrust acceleration, c = drag):
+// Control law (w = water velocity, s = thrust speed; the boat's velocity is x' = w + G u):
 //   v_des  = cruise speed toward the lookahead point on the path (slowing near the destination),
 //            plus a push away from nearby banks
-//   a_cmd  = kv (v_des - v) + c (v - w)        track v_des and cancel the drag toward the water velocity
-//   u      = thruster fractions from the signs/magnitudes of a_cmd / a, clipped to [0, 1]
+//   G u    = v_des - w                          cancel the current and add the desired velocity
+//   u      = thruster fractions from the signs/magnitudes of (v_des - w) / s, scaled down to fit [0, 1]
 
 import { NU } from './boat.js';
 
@@ -50,7 +50,7 @@ export class Autopilot {
   constructor(flow, scenario, model, opts = {}) {
     this.flow = flow;
     this.model = model;
-    this.o = { margin: 16, step: 2, cruise: 2.6, lookahead: 60, holdSeconds: 2.2, arriveRadius: 12, kv: 0.8, minTrip: 250, ...opts };
+    this.o = { margin: 16, step: 2, cruise: 2.6, lookahead: 60, holdSeconds: 2.2, arriveRadius: 12, minTrip: 250, ...opts };
     const step = this.o.step;
     this.nx = Math.floor(flow.nx / step);
     this.ny = Math.floor(flow.ny / step);
@@ -200,8 +200,11 @@ export class Autopilot {
 
   /** If the boat has barely moved for a while mid-trip, re-plan from where it actually is (and eventually pick a new goal). */
   _watchForStall(x, h) {
+    const last = this._lastPos ?? [x[0], x[1]];
+    const speed = h > 0 ? Math.hypot(x[0] - last[0], x[1] - last[1]) / h : 0;
+    this._lastPos = [x[0], x[1]];
     if (this.phase !== 'travel') { this.stuck = 0; return; }
-    this.stuck = Math.hypot(x[2], x[3]) < 0.35 ? (this.stuck ?? 0) + h : 0;
+    this.stuck = speed < 0.35 ? (this.stuck ?? 0) + h : 0;
     if (this.stuck > 40) {
       const path = this.planPath([x[0], x[1]], this.goal);
       this.stuck = 0;
@@ -221,12 +224,12 @@ export class Autopilot {
     return true;
   }
 
-  /** Thruster command u = (N, E, S, W) for state x = (px, py, vx, vy); h = sim seconds since the last call. */
+  /** Thruster command u = (N, E, S, W) for state x = (px, py); h = sim seconds since the last call. */
   control(x, h = 0.4) {
     if (!this.goal) this.newGoal([x[0], x[1]]);
     if (!this.fixed) this._watchForStall(x, h);
     const { flow, o, model } = this;
-    const px = x[0], py = x[1], vx = x[2], vy = x[3];
+    const px = x[0], py = x[1];
     const gx = this.goal[0] - px, gy = this.goal[1] - py, dGoal = Math.hypot(gx, gy);
     if (this.phase === 'travel' && dGoal < o.arriveRadius) { this.phase = 'hold'; this.holdLeft = o.holdSeconds; }
 
@@ -267,10 +270,7 @@ export class Autopilot {
     }
 
     const w = flow.velocity(px, py, this._wv);
-    const { c, a } = model;
-    let ax = o.kv * (vdx - vx) + c * (vx - w[0]);
-    let ay = o.kv * (vdy - vy) + c * (vy - w[1]);
-    let ux = ax / a, uy = ay / a;
+    let ux = (vdx - w[0]) / model.speed, uy = (vdy - w[1]) / model.speed;
     const m = Math.max(Math.abs(ux), Math.abs(uy), 1);
     ux /= m; uy /= m;
     this.u[0] = Math.max(uy, 0); this.u[2] = Math.max(-uy, 0);

@@ -5,7 +5,7 @@
 // is the matrix closest to the identity (Frobenius norm) that maps z[k] exactly onto z[k+1]. The model
 //   z[k+1] = A[k] z[k] + B u[k]
 // therefore reproduces the time series exactly, and its drift depends on the step k, not on where the state is.
-// Control is first-order here (as in DGC): thrust displaces the state, B u[k] meters per step.
+// Control enters as in the boat model (and DGC): thrust displaces the state, B u[k] meters per step.
 //
 // Planning: z[K] is linear in u, so  min || z[K] - z_target ||  over 0 <= u <= 1  is a (bounded) nonnegative
 // least-squares problem, as in DGC (whose doses have no ceiling; the boat's thrusters do). A tiny ridge term spreads
@@ -39,9 +39,9 @@ export function ltvDrift(model, k, x, y, out = [0, 0]) {
   return out;
 }
 
-/** Thrust displacement per step: full thrust moves the state (a/c) * dt meters (the boat's top speed times dt). */
+/** Thrust displacement per step: B = G dt, so full thrust moves the state (thrust speed) * dt meters. */
 export function thrustMatrix(boatModel, dt) {
-  const s = (boatModel.a / boatModel.c) * dt;
+  const s = boatModel.speed * dt;
   // columns N, E, S, W -> (east, north)
   return [[0, s, 0, -s], [s, 0, -s, 0]];
 }

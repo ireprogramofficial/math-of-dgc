@@ -1,4 +1,4 @@
-// Live readouts of a vector, typeset with KaTeX and overlaid on a map: the state x = (p_x, p_y, v_x, v_y)
+// Live readouts of a vector, typeset with KaTeX and overlaid on a map: the state x = (p_x, p_y)
 // and the control u = (u_N, u_E, u_S, u_W). Numbers are padded to fixed widths so a box does not jitter.
 import katex from 'katex';
 import { h } from './ui.js';
@@ -39,14 +39,12 @@ export function createVectorReadout(parent, { symbol, rows }) {
   };
 }
 
-/** The boat's state x = (p_x, p_y, v_x, v_y). */
+/** The boat's state: its position x = (p_x, p_y). */
 export const createStateReadout = (parent) => createVectorReadout(parent, {
   symbol: 'x',
   rows: [
     { label: 'p_x', digits: 0, width: 4, unit: 'm' },
     { label: 'p_y', digits: 0, width: 4, unit: 'm' },
-    { label: 'v_x', digits: 2, width: 4, unit: 'm/s' },
-    { label: 'v_y', digits: 2, width: 4, unit: 'm/s' },
   ],
 });
 

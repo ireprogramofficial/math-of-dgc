@@ -115,23 +115,23 @@ export class SteerScene {
       ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
     }
 
-    // drift f(x) (the water's velocity) and input G(x)u (thrust acceleration)
+    // drift f(x) (the water's velocity) and input G(x)u (the thrust's velocity)
     const w = this.model.flow.velocity(x[0], x[1], [0, 0]);
-    const acc = this.model.thrustAccel(this.u);
+    const acc = this.model.thrustVelocity(this.u);
     arrow(ctx, p[0], p[1], w[0] * 40, -w[1] * 40, COLORS.water, 3.5, 9);
     // thrust arrow, mildly exaggerated: it always clears the hull, and small thrusts still read
     const am = Math.hypot(acc[0], acc[1]);
     if (am > 1e-3) {
-      const L = 30 + 70 * Math.pow(am / this.model.a, 0.6);
+      const L = 30 + 70 * Math.pow(am / this.model.speed, 0.6);
       arrow(ctx, p[0], p[1], (acc[0] / am) * L, (-acc[1] / am) * L, COLORS.thrust, 4.5, 10);
     }
-    boatGlyph(ctx, p[0], p[1], this._heading(x), 1.7, true);
+    boatGlyph(ctx, p[0], p[1], this._heading(this.boat.v), 1.7, true);
     ctx.restore();
   }
 
-  _heading(x) {
-    const sp = Math.hypot(x[2], x[3]);
-    if (sp > 0.15) this._ang = Math.atan2(-x[3], x[2]);
+  _heading(v) {
+    const sp = Math.hypot(v[0], v[1]);
+    if (sp > 0.15) this._ang = Math.atan2(-v[1], v[0]);
     return this._ang ?? 0;
   }
 }

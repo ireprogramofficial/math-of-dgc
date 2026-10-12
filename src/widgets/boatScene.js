@@ -1,9 +1,10 @@
 // BoatScene: a river + a boat + an editable open-loop schedule + (optionally) a live optimizer.
 // Shared by the "schedule" and "optimize" slides.
 
-import { BoatModel, NU } from '../control/boat.js';
+import { BoatModel, NU, NX } from '../control/boat.js';
 import { evaluate, makeProblem, project, TrajectoryOptimizer } from '../control/optimizer.js';
 import { Timeline } from '../control/timeline.js';
+import { autopilotGuess } from '../control/warmStart.js';
 import { DEFAULT_COLORMAP } from '../river/colormaps.js';
 import { RiverView } from '../river/view.js';
 import { arrow, boatGlyph, COLORS } from './draw.js';
@@ -126,7 +127,8 @@ export class BoatScene {
   // ---- solving ----
   startSolve() {
     if (!this.problem) return;
-    this.optimizer = new TrajectoryOptimizer(this.problem, this.U);
+    const problem = this.problem;
+    this.optimizer = new TrajectoryOptimizer(problem, this.U, { fallback: () => autopilotGuess(problem, problem.scenario) });
     this.playing = false;
     this._notify();
     this._pump();
@@ -162,7 +164,7 @@ export class BoatScene {
     if (!e) return null;
     let aground = 0;
     const flow = this.view.flow;
-    for (let j = 1; j <= e.M; j++) if (flow.insideAt(e.X[4 * j], e.X[4 * j + 1]) < 0) aground++;
+    for (let j = 1; j <= e.M; j++) if (flow.insideAt(e.X[NX * j], e.X[NX * j + 1]) < 0) aground++;
     return { t: this.t, T: this.T, miss: e.miss, effort: e.effort, J: e.J, grounded: aground / e.M, iter: this.optimizer?.iter ?? this.solved?.iter ?? 0, solving: this.solving };
   }
 
@@ -181,15 +183,17 @@ export class BoatScene {
   _pose(t) {
     const { X, M, h } = this.eval;
     const f = Math.min(Math.max(t / h, 0), M - 1e-9), j = Math.floor(f), a = f - j;
-    const g = (i) => X[4 * j + i] * (1 - a) + X[4 * (j + 1) + i] * a;
-    return { x: g(0), y: g(1), vx: g(2), vy: g(3), j };
+    const g = (i) => X[NX * j + i] * (1 - a) + X[NX * (j + 1) + i] * a;
+    // velocity over this sub-step: x' = f(x) + G u
+    const d = (i) => (X[NX * (j + 1) + i] - X[NX * j + i]) / h;
+    return { x: g(0), y: g(1), vx: d(0), vy: d(1), j };
   }
 
   _stroke(ctx, X, j0, j1, cam) {
     const p = [0, 0];
     ctx.beginPath();
     for (let j = j0; j <= j1; j++) {
-      cam.worldToScreen(X[4 * j], X[4 * j + 1], p);
+      cam.worldToScreen(X[NX * j], X[NX * j + 1], p);
       j === j0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]);
     }
     ctx.stroke();
@@ -225,7 +229,7 @@ export class BoatScene {
     // aground segments in red
     ctx.strokeStyle = COLORS.bad; ctx.lineWidth = 5;
     for (let j = 1; j <= e.M; j++) {
-      if (flow.insideAt(e.X[4 * j], e.X[4 * j + 1]) >= 0) continue;
+      if (flow.insideAt(e.X[NX * j], e.X[NX * j + 1]) >= 0) continue;
       this._stroke(ctx, e.X, j - 1, j, cam);
     }
 
@@ -233,7 +237,7 @@ export class BoatScene {
     ctx.fillStyle = 'rgba(22,40,61,0.5)';
     for (let k = 0; k <= N_INTERVALS; k += 1) {
       const j = k * SUBSTEPS;
-      cam.worldToScreen(e.X[4 * j], e.X[4 * j + 1], p);
+      cam.worldToScreen(e.X[NX * j], e.X[NX * j + 1], p);
       ctx.beginPath(); ctx.arc(p[0], p[1], 1.6, 0, 6.283); ctx.fill();
     }
 
@@ -245,10 +249,11 @@ export class BoatScene {
     cam.worldToScreen(pose.x, pose.y, p);
     const w = flow.velocity(pose.x, pose.y, [0, 0]);
     const k = Math.min(Math.floor(this.t / (this.T / N_INTERVALS)), N_INTERVALS - 1);
-    const acc = this.model.thrustAccel(this.U.subarray(NU * k, NU * k + NU));
-    const vs = 30, as = 70; // px per (m/s), px per (m/s^2)
+    // all three are velocities on one scale: the boat's velocity is the drift's plus the thrust's
+    const gu = this.model.thrustVelocity(this.U.subarray(NU * k, NU * k + NU));
+    const vs = 30; // px per (m/s)
     arrow(ctx, p[0], p[1], w[0] * vs, -w[1] * vs, COLORS.water, 3);
-    arrow(ctx, p[0], p[1], acc[0] * as, -acc[1] * as, COLORS.thrust, 4, 9);
+    arrow(ctx, p[0], p[1], gu[0] * vs, -gu[1] * vs, COLORS.thrust, 4, 9);
     this._boat(ctx, p[0], p[1], Math.atan2(-pose.vy, pose.vx), Math.hypot(pose.vx, pose.vy));
     arrow(ctx, p[0], p[1], pose.vx * vs, -pose.vy * vs, COLORS.ink, 2.2, 7);
     ctx.restore();

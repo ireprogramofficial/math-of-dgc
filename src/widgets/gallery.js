@@ -1,6 +1,7 @@
 // A river as a vector field: the map, an optional math label on it, and the shared (quiet) controls below.
 // With data-probe, a click in the water starts a trajectory x(t) = phi_t(x0) from that point (at rest),
 // shown with its live state vector; it fades out after PROBE_SECONDS. One trajectory at a time.
+// The state is the position, so the trajectory follows the drawn field exactly (it is a streamline of f).
 import katex from 'katex';
 import { BoatModel, NU } from '../control/boat.js';
 import { LiveBoat } from '../control/liveBoat.js';
@@ -42,7 +43,7 @@ function addProbe(view, stage) {
   view.onClick = (w) => {
     if (!model || !view.flow.isWater(w[0], w[1], 3)) return;
     const boat = new LiveBoat(model);
-    boat.x.set([w[0], w[1], 0, 0]); // start at rest
+    boat.x.set([w[0], w[1]]);
     probe = { boat, x0: [w[0], w[1]], pts: [[w[0], w[1]]], age: 0 };
     hint.style.display = 'none';
   };

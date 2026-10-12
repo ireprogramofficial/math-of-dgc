@@ -14,11 +14,10 @@ const data = makeDriftData(flow, scn);
 function planAndRun(field) {
   const start = data.series[0], target = data.single, T = 500;
   const problem = makeProblem(new BoatModel(field), { ...scn, boat: { start, target, horizon: T } });
-  problem.x0 = Float64Array.of(start[0], start[1], 0, 0);
   const opt = new TrajectoryOptimizer(problem);
   opt.run(4000);
   const boat = new LiveBoat(new BoatModel(flow)), u = new Float64Array(NU), M = problem.N * problem.sub;
-  boat.x.set([start[0], start[1], 0, 0]);
+  boat.x.set(start);
   for (let j = 0; j < M; j++) { const k = Math.floor(j / problem.sub); for (let c = 0; c < NU; c++) u[c] = opt.U[NU * k + c]; boat.step(u, T / M); }
   return { planned: opt.last.miss, actual: Math.hypot(boat.x[0] - target[0], boat.x[1] - target[1]) };
 }
@@ -73,7 +72,7 @@ describe('fit 4: rank-one LTV (DGC-style)', async () => {
     expect(plan.plannedMiss).toBeLessThan(5);
     for (const v of plan.U) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThanOrEqual(1); }
     const boat = new LiveBoat(new BoatModel(flow)), u = new Float64Array(NU);
-    boat.x.set([start[0], start[1], 0, 0]);
+    boat.x.set(start);
     for (let k = 0; k < K; k++) { for (let c = 0; c < NU; c++) u[c] = plan.U[NU * k + c]; for (let j = 0; j < 56; j++) boat.step(u, 0.5); }
     expect(Math.hypot(boat.x[0] - target[0], boat.x[1] - target[1])).toBeGreaterThan(100);
   });

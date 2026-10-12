@@ -6,7 +6,7 @@
 // Fit 4 (DGC-style, rank-one time-varying) is planned in its own first-order model by bounded nonnegative least
 // squares over K steps of the data's sampling interval, then run on the actual boat the same way.
 import katex from 'katex';
-import { BoatModel, NU } from '../control/boat.js';
+import { BoatModel, NU, NX } from '../control/boat.js';
 import { FIT_METHODS, ltvFields, makeDriftData, SERIES } from '../control/driftFits.js';
 import { planLTV, thrustMatrix } from '../control/rankOneLTV.js';
 import { LiveBoat } from '../control/liveBoat.js';
@@ -86,7 +86,6 @@ export function create(el) {
     const start = data.series[0], target = data.single;
     const scn = { ...view.scenario, boat: { start, target, horizon: HORIZON } };
     const problem = makeProblem(new BoatModel(field), scn);
-    problem.x0 = Float64Array.of(start[0], start[1], 0, 0);
     const opt = new TrajectoryOptimizer(problem);
     plans[key] = 'pending';
     const step = () => {
@@ -96,7 +95,7 @@ export function create(el) {
       if (!opt.done && opt.iter < 4000) { setTimeout(step, 0); return; }
       const planned = evaluate(problem, opt.U).X;
       const boat = new LiveBoat(new BoatModel(actual)), u = new Float64Array(NU);
-      boat.x.set([start[0], start[1], 0, 0]);
+      boat.x.set(start);
       const M = problem.N * problem.sub, hh = HORIZON / M, real = [[start[0], start[1]]];
       for (let j = 0; j < M; j++) {
         const k = Math.floor(j / problem.sub);
@@ -105,7 +104,7 @@ export function create(el) {
         real.push([boat.x[0], boat.x[1]]);
       }
       plans[key] = {
-        planned: Array.from({ length: planned.length / 4 }, (_, j) => [planned[4 * j], planned[4 * j + 1]]), real,
+        planned: Array.from({ length: planned.length / NX }, (_, j) => [planned[NX * j], planned[NX * j + 1]]), real,
         plannedMiss: opt.last.miss,
         realMiss: Math.hypot(boat.x[0] - target[0], boat.x[1] - target[1]),
       };
@@ -120,7 +119,7 @@ export function create(el) {
     const start = data.series[0], target = data.single, dt = SERIES.every;
     const res = planLTV(data.ltv, thrustMatrix(new BoatModel(actual), dt), start, target, LTV_STEPS);
     const boat = new LiveBoat(new BoatModel(actual)), u = new Float64Array(NU), hh = 0.5, sub = Math.round(dt / hh);
-    boat.x.set([start[0], start[1], 0, 0]);
+    boat.x.set(start);
     const real = [[start[0], start[1]]];
     for (let k = 0; k < LTV_STEPS; k++) {
       for (let c = 0; c < NU; c++) u[c] = res.U[NU * k + c];
