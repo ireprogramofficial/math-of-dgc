@@ -17,6 +17,7 @@
           <div class="title-card">
             <div class="kicker">Working session</div>
             <h1>The math of DGC<svg class="title-boat" viewBox="-12 -9 44 18" aria-hidden="true"><g stroke-linecap="round" stroke-linejoin="round"><path d="M0 0L25.5 -4.25" stroke="#fff" stroke-width="4.5"/><path d="M0 0L23.5 4.2" stroke="#fff" stroke-width="4.5"/><path d="M0 0L25.5 -4.25" stroke="#1f6fb2" stroke-width="2.2"/><path d="M30 -5L25.5 -1.7L24.7 -6.6Z" fill="#1f6fb2" stroke="#1f6fb2" stroke-width="0.8"/><path d="M0 0L23.5 4.2" stroke="#d8572a" stroke-width="2.2"/><path d="M28 5L22.6 6.6L23.5 1.7Z" fill="#d8572a" stroke="#d8572a" stroke-width="0.8"/></g><path d="M13 0Q5 6.5 -10 6L-10 -6Q5 -6.5 13 0Z" fill="#fff" stroke="#16283d" stroke-width="2" stroke-linejoin="round"/></svg></h1>
+            <div class="title-sub">Data-Guided Control</div>
             <p>Dynamics, control, and trajectory optimization, with one running example: planning an open-loop schedule for a boat on a river.</p>
           </div>
         </section>
@@ -28,18 +29,18 @@
             <h2>A dynamical system</h2>
           </div>
           <div class="slide-body cols-map-side">
-            <div class="river-widget" data-widget="gallery" data-scenario="meander" data-probe data-label="\dot{x} = f(x)"></div>
+            <div class="river-widget" data-widget="gallery" data-scenario="meander" data-probe data-label="\dot{x} = f(x)" data-note="x \in \mathbb{R}^2"></div>
             <div class="side">
               <div class="defn">
                 <p class="defn-lead">A <b>dynamical system</b> is a pair \((X, f)\):</p>
                 <dl>
                   <dt>State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
-                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is a vector field called the <b>drift</b></dd>
+                  <dt>Dynamics</dt><dd>\(\dot{x} = f(x)\), where \(f : X \to \mathbb{R}^n\) is a vector field (the <b>drift</b>, once we add control)</dd>
                 </dl>
               </div>
               <div class="defn element">
                 <dl>
-                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0)\): the state at time \(t\) from initial state \(x_0 \in X\), exactly one</dd>
+                  <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0)\): the solution of \(\dot{x} = f(x)\) with \(x(0) = x_0\)<br>(unique when \(f\) is smooth)</dd>
                 </dl>
               </div>
             </div>
@@ -68,7 +69,7 @@
                   <dt>Trajectory</dt><dd>\(x(t) = \varphi_t(x_0, u)\),<br>one for each \(u \in \mathcal{U}\)</dd>
                 </dl>
               </div>
-              <p>Drift dynamics and thrust dynamics together make the system's full dynamics.</p>
+              <p>The full dynamics are the drift plus the effect of the control: \(f(x) + G(x)\,u\).</p>
             </div>
           </div>
         </section>
@@ -87,7 +88,7 @@
                 <div class="loop-row">
                   <div class="blk">\(u(t)\)</div>
                   <div class="arr"></div>
-                  <div class="blk plant">\(\dot{x} = f(x) + G(x)\,u\)</div>
+                  <div class="blk plant">\(\dot{x} = f(x) + G(x)\,u\)<div class="dist">gust</div></div>
                   <div class="arr"></div>
                   <div class="out">\(x\)</div>
                 </div>
@@ -98,7 +99,7 @@
                 <div class="loop-row">
                   <div class="blk">\(u = \kappa(x)\)</div>
                   <div class="arr"></div>
-                  <div class="blk plant">\(\dot{x} = f(x) + G(x)\,u\)</div>
+                  <div class="blk plant">\(\dot{x} = f(x) + G(x)\,u\)<div class="dist">gust</div></div>
                   <div class="arr"></div>
                   <div class="out">\(x\)</div>
                   <div class="feedback"></div>

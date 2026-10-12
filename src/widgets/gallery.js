@@ -20,6 +20,8 @@ export function create(el) {
   if (el.dataset.label) {
     const label = h('div', { class: 'map-math' });
     label.innerHTML = katex.renderToString(el.dataset.label, { throwOnError: false });
+    // optional second line: the running example's state, e.g. data-note="x \in \mathbb{R}^2"
+    if (el.dataset.note) label.innerHTML += `<div class="map-math-note">boat: ${katex.renderToString(el.dataset.note, { throwOnError: false })}</div>`;
     stage.append(label);
   }
   const controls = createMapControls(view);

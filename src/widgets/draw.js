@@ -1,6 +1,6 @@
 // Canvas drawing helpers shared by the boat slides (layout-pixel coordinates).
 
-export const COLORS = { thrust: '#d8572a', water: '#1f6fb2', ink: '#16283d', bad: '#c0392b', good: '#2e8b57', open: '#e8833a', closed: '#21a179' };
+export const COLORS = { thrust: '#d8572a', water: '#1f6fb2', ink: '#16283d', bad: '#c0392b', good: '#2e8b57', open: '#c03d8f', closed: '#21a179' };
 
 /** An arrow from (x, y) by (dx, dy), with a white halo so it reads on any water color. */
 export function arrow(ctx, x, y, dx, dy, color, width = 3, head = 8) {

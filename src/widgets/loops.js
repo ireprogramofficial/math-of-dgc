@@ -27,6 +27,7 @@ export function create(el) {
   stage.append(h('div', { class: 'map-actions' }, gustBtn, againBtn));
   view.setLegendItems([
     { color: COLORS.open, text: 'open loop' },
+    { color: COLORS.open, text: 'open-loop plan', dash: true },
     { color: COLORS.closed, text: 'closed loop' },
   ]);
   const controls = createMapControls(view);

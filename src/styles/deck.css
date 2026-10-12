@@ -47,6 +47,8 @@
 .title-slide .river-widget { position: absolute; inset: 0; }
 .title-card { position: absolute; left: 56px; bottom: 64px; max-width: 700px; padding: 26px 32px 24px; background: rgba(255,255,255,0.88); border-radius: 14px; backdrop-filter: blur(6px); box-shadow: 0 6px 30px rgba(20,40,70,0.18); }
 .title-card h1 { font-size: 2.1em; }
+.defn .katex { white-space: nowrap; } /* never break an inline formula across lines */
+.title-card .title-sub { margin-top: 4px; font-size: 1.05em; font-weight: 600; color: var(--ink); }
 .title-card p { margin: 10px 0 0; color: var(--muted); font-size: 0.82em; }
 
 /* ---------- river widget ---------- */
@@ -139,14 +141,18 @@
 
 /* ---------- closed- vs open-loop block diagrams ---------- */
 .loop { background: var(--wash); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 12px; border-left: 5px solid var(--c); }
-.loop.open { --c: #e8833a; }
+.loop.open { --c: #c03d8f; }
 .loop.closed { --c: #21a179; }
 .loop-title { font-weight: 700; color: var(--c); font-size: 1.1em; margin-bottom: 8px; }
-.loop-row { position: relative; display: flex; align-items: center; gap: 0; }
+.loop-row { position: relative; display: flex; align-items: center; gap: 0; margin-top: 30px; }
 .loop.closed .loop-row { margin-bottom: 30px; }
 .blk { background: var(--paper); border: 2px solid var(--ink); border-radius: 7px; padding: 6px 8px; white-space: nowrap; }
 .blk .katex { font-size: 0.95em; }
-.blk.plant { flex: 1; text-align: center; }
+.blk.plant { flex: 1; text-align: center; position: relative; }
+/* the disturbance (gust) entering the plant from above: not part of the model, so no controller plans for it */
+.dist { position: absolute; left: 50%; bottom: 100%; height: 28px; padding-left: 8px; font-size: 0.8em; line-height: 1; color: var(--muted); font-style: italic; }
+.dist::before { content: ""; position: absolute; left: 0; top: 0; bottom: 6px; width: 2px; background: var(--muted); }
+.dist::after { content: ""; position: absolute; left: -5px; bottom: 0; border: 6px solid transparent; border-top: 8px solid var(--muted); border-bottom: 0; }
 .arr { width: 22px; height: 2px; background: var(--ink); position: relative; flex: none; }
 .arr::after { content: ""; position: absolute; right: -1px; top: -5px; border: 6px solid transparent; border-left: 8px solid var(--ink); border-right: 0; }
 .out { padding-left: 6px; }
@@ -187,7 +193,7 @@
 .map-readouts { position: absolute; right: 10px; top: 10px; z-index: 3; display: flex; gap: 8px; align-items: flex-start; pointer-events: none; }
 .map-readouts .state-readout { position: static; }
 /* on the control-system slide the math label takes the top-left, so the status chip sits under it */
-.steer-widget .steer-chip { top: 62px; }
+.steer-widget .steer-chip { top: 86px; }
 
 .unknown { color: var(--bad); }
 .map-math-note { font-size: 13px; color: var(--muted); margin-top: 2px; font-family: "Source Sans Pro", system-ui, sans-serif; }

@@ -1,4 +1,4 @@
-// Slide: a control system. A boat steers itself between points; hold W A S D (or the on-screen pad) to take over.
+// Slide: a control system. An open-loop autopilot cycles the thrust direction; hold W A S D (or the on-screen pad) to take over.
 import { DIRS } from '../control/boat.js';
 import { COLORS } from './draw.js';
 import { createMapControls } from './mapControls.js';
@@ -26,7 +26,8 @@ export function create(el) {
   const pad = h('div', { class: 'steer-pad', 'data-prevent-swipe': '' }, ...padBtns);
   // the dynamics, labeled on the map (top-left), like the dynamical-system slide
   const label = h('div', { class: 'map-math' });
-  label.innerHTML = katex.renderToString(String.raw`\dot{x} = f(x) + G(x)\,u(t)`, { throwOnError: false });
+  label.innerHTML = katex.renderToString(String.raw`\dot{x} = f(x) + G(x)\,u(t)`, { throwOnError: false })
+    + `<div class="map-math-note">boat: ${katex.renderToString(String.raw`x \in \mathbb{R}^2,\ u \in [0,1]^4`, { throwOnError: false })}</div>`;
   // live input u and state x side by side (top-right)
   const readouts = h('div', { class: 'map-readouts' });
   stage.append(label, chip, pad, readouts);
@@ -41,12 +42,12 @@ export function create(el) {
   el.append(stage, controls.el);
 
   let lastMode = '', lastText = '';
-  function update({ mode, secondsLeft, u, holding }) {
+  function update({ mode, secondsLeft, u, dir }) {
     padBtns.forEach((b, c) => b.style.setProperty('--u', u[c].toFixed(2)));
     uReadout.set(u);
     readout.set(scene.boat.x);
     if (mode !== lastMode) { chip.dataset.mode = mode; lastMode = mode; }
-    const text = mode === 'manual' ? `Manual steering · autopilot resumes in ${Math.ceil(secondsLeft)} s` : holding ? 'Autopilot · arrived, pausing' : 'Autopilot · steering to a new point';
+    const text = mode === 'manual' ? `Manual steering · autopilot resumes in ${Math.ceil(secondsLeft)} s` : `Autopilot (open loop) · full thrust ${dir}`;
     if (text !== lastText) { chip.textContent = text; lastText = text; }
   }
 
