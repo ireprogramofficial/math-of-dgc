@@ -6,7 +6,9 @@
 // and very different away from it:
 //   fit 1  one linear model  x' = A x + b  fit to basin 2, extrapolated everywhere (as DGC does with its A[k])
 //   fit 2  a kernel average of the sampled velocities: the gyre where there is data, still water everywhere else
-//   fit 3  fit 2 near the data, plus a guessed current elsewhere (here, the river running backward)
+//   fit 3  a quadratic polynomial drift (12 parameters) fit by least squares to the same samples: more flexible
+//          than fit 1, equally consistent with the data, and it extrapolates very differently
+// All three use only the samples: no knowledge of the channels, inlet, outlets, or the other basins.
 import katex from 'katex';
 import { FlowField } from '../river/flowfield.js';
 import { RiverView } from '../river/view.js';
@@ -94,6 +96,49 @@ function fitKernel(samples, sigma = 35, eps = 0.4) {
   };
 }
 
+/**
+ * Least-squares fit of a quadratic polynomial drift: each velocity component is
+ * c0 + c1 dx + c2 dy + c3 dx^2 + c4 dx dy + c5 dy^2, with (dx, dy) centered and scaled.
+ * The samples lie close to a circle, which makes dx^2 + dy^2 nearly constant (nearly redundant with c0),
+ * so a tiny ridge penalty on the quadratic terms keeps the problem well-posed.
+ */
+function fitQuadratic(samples, ridge = 1e-3) {
+  const n = samples.length;
+  const mx = samples.reduce((a, q) => a + q.x, 0) / n, my = samples.reduce((a, q) => a + q.y, 0) / n;
+  const sc = Math.sqrt(samples.reduce((a, q) => a + (q.x - mx) ** 2 + (q.y - my) ** 2, 0) / n) || 1;
+  const feat = (x, y) => { const a = (x - mx) / sc, b = (y - my) / sc; return [1, a, b, a * a, a * b, b * b]; };
+  const d = 6, M = Array.from({ length: d }, () => new Array(d).fill(0)), rx = new Array(d).fill(0), ry = new Array(d).fill(0);
+  for (const q of samples) {
+    const f = feat(q.x, q.y);
+    for (let i = 0; i < d; i++) { for (let j = 0; j < d; j++) M[i][j] += f[i] * f[j]; rx[i] += f[i] * q.vx; ry[i] += f[i] * q.vy; }
+  }
+  for (let i = 3; i < d; i++) M[i][i] += ridge * n;
+  const solve = (A, y) => { // Gaussian elimination with partial pivoting
+    const m = A.map((row, i) => [...row, y[i]]);
+    for (let c = 0; c < d; c++) {
+      let p = c; for (let r = c + 1; r < d; r++) if (Math.abs(m[r][c]) > Math.abs(m[p][c])) p = r;
+      [m[c], m[p]] = [m[p], m[c]];
+      for (let r = 0; r < d; r++) if (r !== c) { const k = m[r][c] / m[c][c]; for (let j = c; j <= d; j++) m[r][j] -= k * m[c][j]; }
+    }
+    return m.map((row, i) => row[d] / row[i]);
+  };
+  const cx = solve(M, rx), cy = solve(M, ry);
+  return (x, y, out) => {
+    const f = feat(x, y);
+    out[0] = 0; out[1] = 0;
+    for (let i = 0; i < d; i++) { out[0] += cx[i] * f[i]; out[1] += cy[i] * f[i]; }
+    return out;
+  };
+}
+
+/** RMS mismatch (m/s) between a fitted drift and the sampled velocities. */
+export function fitResidual(fn, samples) {
+  const o = [0, 0, 0];
+  let s2 = 0;
+  for (const q of samples) { fn(q.x, q.y, o); s2 += (o[0] - q.vx) ** 2 + (o[1] - q.vy) ** 2; }
+  return Math.sqrt(s2 / samples.length);
+}
+
 /** A FlowField on the actual river's grid, from a velocity function (clipped to MAX_SPEED). */
 function fieldFrom(actual, fn) {
   const { nx, ny, cell } = actual, u = new Float32Array(nx * ny), v = new Float32Array(nx * ny), o = [0, 0, 0];
@@ -108,16 +153,12 @@ function fieldFrom(actual, fn) {
 
 function buildFits(actual, series, dt) {
   const samples = velocitySamples(series, dt);
-  const lin = fitLinear(samples), ker = fitKernel(samples);
+  const lin = fitLinear(samples), ker = fitKernel(samples), quad = fitQuadratic(samples);
   const fit1 = fieldFrom(actual, (x, y, o) => lin(x, y, o));
   const fit2 = fieldFrom(actual, (x, y, o) => ker(x, y, o));
-  const fit3 = fieldFrom(actual, (x, y, o, k) => {
-    ker(x, y, o);
-    const c = o[2];
-    o[0] += (1 - c) * -0.7 * actual.u[k];
-    o[1] += (1 - c) * -0.7 * actual.v[k];
-  });
-  return { fit1, fit2, fit3 };
+  const fit3 = fieldFrom(actual, (x, y, o) => quad(x, y, o));
+  const residuals = { fit1: fitResidual(lin, samples), fit2: fitResidual(ker, samples), fit3: fitResidual(quad, samples) };
+  return { fit1, fit2, fit3, residuals };
 }
 
 const MODES = {
@@ -125,7 +166,7 @@ const MODES = {
   actual: { button: 'Reveal actual drift', tex: String.raw`\dot{x} = f(x)`, note: 'The actual drift' },
   fit1: { button: 'Fit drift 1', tex: String.raw`\dot{x} = \hat{f}_1(x) = A\,x + b`, note: 'One linear model fit to basin 2, extrapolated everywhere' },
   fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x)`, note: 'Only where there is data; still water everywhere else' },
-  fit3: { button: 'Fit drift 3', tex: String.raw`\dot{x} = \hat{f}_3(x)`, note: 'Fits the data; guesses a current everywhere else' },
+  fit3: { button: 'Fit drift 3', tex: String.raw`\dot{x} = \hat{f}_3(x) = \text{quadratic in } x`, note: 'A richer model fit to the same samples, extrapolated everywhere' },
 };
 
 export function create(el) {
