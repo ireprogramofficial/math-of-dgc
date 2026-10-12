@@ -201,10 +201,10 @@
 .vr-split .zero { flex: 1; background: #fff; color: var(--la-ink); }
 
 /* ---------- difference-equation widget ---------- */
-.la-body.de-cols { grid-template-columns: 430px minmax(0, 1fr); }
-.de-problem { font-size: 22px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
-.de-problem .katex-display { margin: 0; }
-.de-problem .la-note { color: var(--la-muted); font-size: 16px; margin: 0; }
+.pr-body { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 36px; }
+.pr-statement { font-size: 34px; }
+.pr-statement .katex-display { margin: 0; }
+.pr-body .la-note { color: var(--la-muted); font-size: 20px; margin: 0; max-width: 900px; text-align: center; }
 .de-widget { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 70px; }
 .de-row { display: flex; align-items: center; justify-content: center; gap: 14px; padding-right: 40px; }
 .de-op { font: 34px "Cambria Math", "Times New Roman", serif; margin-top: -10px; }
@@ -226,7 +226,4 @@
 .de-note .dim { color: var(--la-muted); }
 .de-sep { stroke: var(--c, var(--la-ink)); stroke-width: 1.4; }
 .de-u .de-sep { stroke: var(--la-ink); }
-.de-B .de-top { position: relative; }
-.de-slice { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; display: flex; align-items: center; gap: 6px; font-size: 11px; line-height: 1.2; text-align: left; color: var(--la-muted); }
-.de-slice-box { fill: #fff; stroke: var(--la-ink); stroke-width: 1.2; }
-.de-slice-col { fill: var(--optimization); }
+.de-alias { grid-column: 2; grid-row: 4; font-size: 18px; white-space: nowrap; }

@@ -1,4 +1,5 @@
 // The DGC difference equation x[k+1] = A[k] x[k] + B_R u[k], drawn with the deck's array diagrams.
+// Indexing is 1-based: x[1] = x_initial, A[1] … A[K−1], x[K] the endpoint. data-k on the element pins one step.
 // The TAD-sized shapes are proportional to the real sizes (Ñ TADs). B_R is a recipe: a slice of R columns of the full
 // signed-TF matrix B, so B_R and u[k] are drawn one cell per column / entry (to scale they would be under a pixel).
 // Brackets under the products show that the inner dimensions match. Hover a term to light up the dimensions it shares.
@@ -9,38 +10,35 @@ const fmtN = (x) => x.toLocaleString('en-US');
 const NT = data.dims.Ntilde;          // TADs
 const MS = data.dims.M_expanded;      // signed TF columns of the full B
 const R = 5;                          // TFs in one recipe: the columns of B_R
-const H = 170;                        // px for Ñ
-const W_VEC = 18;
+const H = 250;                        // px for Ñ
+const W_VEC = 22;
 const px = (n) => (n / NT) * H;
 
-// Each term: its shape (rows × cols in real units), color, symbol and dimension names.
+const K = data.dims.K;                // time points, 1-indexed: x[1] … x[K], steps k = 1 … K−1
+
+// Each term: its shape (rows × cols in real units), color, symbol (for step k) and dimension names.
+// `alias` names a term that is pinned at the first or last step.
 const TERMS = [
-  { id: 'x1', sym: 'x[k+1]', rows: NT, cols: 1, rowName: 'TADs' },
+  { id: 'x1', sym: (k) => `x[${k.next}]`, rows: NT, cols: 1, rowName: 'TADs', alias: (k) => (k.n === K - 1 ? 'x[K]' : null) },
   { op: '=' },
-  { id: 'A', sym: 'A[k]', rows: NT, cols: NT, rowName: 'TADs', colName: 'TADs', color: '#1a5fb4' },
-  { id: 'x0', sym: 'x[k]', rows: NT, cols: 1, rowName: 'TADs', gap: 10 },
+  { id: 'A', sym: (k) => `A[${k.at}]`, rows: NT, cols: NT, rowName: 'TADs', colName: 'TADs', color: '#1a5fb4' },
+  { id: 'x0', sym: (k) => `x[${k.at}]`, rows: NT, cols: 1, rowName: 'TADs', gap: 10, alias: (k) => (k.n === 1 ? '\\textcolor{#1a5fb4}{x_{\\text{initial}}}' : null) },
   { op: '+' },
-  { id: 'B', sym: 'B_R', rows: NT, cols: R, rowName: 'TADs', colName: 'recipe TFs', color: '#e8501a', cellCols: true },
-  { id: 'u', sym: 'u[k] \\ge 0', rows: R, cols: 1, rowName: 'recipe TFs', gap: 10, cellRows: true },
+  { id: 'B', sym: () => 'B_R', rows: NT, cols: R, rowName: 'TADs', colName: 'recipe TFs', color: '#e8501a', cellCols: true },
+  { id: 'u', sym: (k) => `u[${k.at}] \\ge 0`, rows: R, cols: 1, rowName: 'recipe TFs', gap: 10, cellRows: true },
 ];
 // Which terms share a dimension (inner dimensions of the two products, and the common TAD rows).
 const PAIRS = { A: ['x0'], x0: ['A'], B: ['u'], u: ['B'], x1: ['A', 'B'] };
 
-// A small sketch of the full B with the recipe's columns picked out: B_R is that slice.
-function sliceSketch() {
-  const wrap = document.createElement('div');
-  wrap.className = 'de-slice';
-  const svg = s('svg', { width: 74, height: 46, viewBox: '0 0 74 46' }, wrap);
-  s('rect', { x: 1, y: 1, width: 72, height: 44, class: 'de-slice-box' }, svg);
-  for (const x of [9, 22, 38, 47, 63]) s('rect', { x, y: 1, width: 3, height: 44, class: 'de-slice-col' }, svg);
-  const t = document.createElement('div');
-  t.innerHTML = `slice of <i>B</i><br>(${fmtN(MS)} signed TFs)`;
-  wrap.append(t);
-  return wrap;
+/** The step this slide shows: data-k="1" or "47" pins it; anything else draws the generic step k. */
+function stepOf(el) {
+  const n = Number(el.dataset.k);
+  return Number.isInteger(n) && n >= 1 && n < K ? { n, at: `${n}`, next: `${n + 1}` } : { n: null, at: 'k', next: 'k+1' };
 }
 
 export function create(el) {
   el.classList.add('de-widget');
+  const step = stepOf(el);
   const row = document.createElement('div');
   row.className = 'de-row';
   const termEls = {};
@@ -61,7 +59,6 @@ export function create(el) {
     // column count on top for matrices, row count on the left for everything
     box.innerHTML = `<div class="de-top">${T.cols > 1 ? `${T.colName}<br><b>${fmtN(T.cols)}</b>` : ''}</div>` +
       `<div class="de-side">${T.rowName}<br><b>${fmtN(T.rows)}</b></div>`;
-    if (T.cellCols) box.querySelector('.de-top').prepend(sliceSketch());
     const svg = s('svg', { width: w + 2, height: h + 2, viewBox: `0 0 ${w + 2} ${h + 2}`, class: 'de-shape' });
     s('rect', { x: 1, y: 1, width: w, height: h, class: 'de-box' }, svg);
     if (T.cellCols) {
@@ -78,8 +75,16 @@ export function create(el) {
     box.append(svg);
     const sym = document.createElement('div');
     sym.className = 'de-sym';
-    setTex(sym, T.color ? `\\textcolor{${T.color}}{${T.sym}}` : T.sym);
+    const tex = T.sym(step);
+    setTex(sym, T.color ? `\\textcolor{${T.color}}{${tex}}` : tex);
     box.append(sym);
+    const alias = T.alias?.(step);
+    if (alias) {
+      const a = document.createElement('div');
+      a.className = 'de-alias';
+      setTex(a, `= ${alias}`);
+      box.append(a);
+    }
     row.append(box);
     termEls[T.id] = box;
   }
@@ -96,20 +101,24 @@ export function create(el) {
     brackets.replaceChildren();
     for (const [m, v, label] of [['A', 'x0', `${fmtN(NT)} = ${fmtN(NT)}`], ['B', 'u', `${R} = ${R}`]]) {
       const a = rel(termEls[m].querySelector('.de-shape')), b = rel(termEls[v].querySelector('.de-shape'));
-      const y = rel(termEls[m].querySelector('.de-sym')).y + 44;
+      // below the lowest label in the row (some terms carry an extra '= …' line)
+      const y = Math.max(...Object.values(termEls).map((t) => { const r = rel(t); return r.y + r.h; })) + 18;
       const x0 = a.x + 2, x1 = b.x + b.w - 2;
       s('path', { d: `M${x0},${y - 8} V${y} H${x1} V${y - 8}`, class: 'de-bracket' }, brackets);
       s('text', { x: (x0 + x1) / 2, y: y + 18, class: 'de-bracket-text' }, brackets).textContent = `inner dimensions match: ${label}`;
     }
   }
 
-  const NOTE = `<span class="dim">Hover a term to see which dimensions it shares. B<sub>R</sub> and u[k] are drawn one cell per column and entry; at the scale of the other shapes, ${R} columns would be under a pixel wide.</span>`;
+  const { at, next } = step;
+  const NOTE = `<span class="dim">Hover a term to see which dimensions it shares. B<sub>R</sub> and u[${at}] are drawn one cell per column and entry; at the scale of the other shapes, ${R} columns would be under a pixel wide.</span>`;
   const TEXT = {
-    x1: `The next state: one value per TAD (${fmtN(NT)}). Both terms on the right produce a vector of this length.`,
-    A: `A[k] is ${fmtN(NT)} × ${fmtN(NT)}: its ${fmtN(NT)} columns meet the ${fmtN(NT)} entries of x[k]. It carries the cell forward one step on its own.`,
-    x0: `The current state, ${fmtN(NT)} entries: one per column of A[k].`,
-    B: `B_R is ${fmtN(NT)} × ${R}: a recipe, ${R} columns sliced from the ${fmtN(MS)} signed-TF columns of B. Its columns meet the entries of u[k].`,
-    u: `The input at step k: one nonnegative dose per TF in the recipe, ${R} entries, one per column of B_R.`,
+    x1: `The next state x[${next}]: one value per TAD (${fmtN(NT)}). Both terms on the right produce a vector of this length.` +
+      (step.n === K - 1 ? ` This is the last step, so x[${next}] = x[K] is the endpoint compared with x_target.` : ''),
+    A: `A[${at}] is ${fmtN(NT)} × ${fmtN(NT)}: its ${fmtN(NT)} columns meet the ${fmtN(NT)} entries of x[${at}]. It carries the cell forward one step on its own.`,
+    x0: `The current state x[${at}], ${fmtN(NT)} entries: one per column of A[${at}].` +
+      (step.n === 1 ? ' At the first step it is fixed: x[1] = x_initial.' : ''),
+    B: `B_R is ${fmtN(NT)} × ${R}: a recipe, ${R} columns sliced from the ${fmtN(MS)} signed-TF columns of B. The same B_R acts at every step. Its columns meet the entries of u[${at}].`,
+    u: `The input at step ${at}: one nonnegative dose per TF in the recipe, ${R} entries, one per column of B_R.`,
   };
   for (const [id, e] of Object.entries(termEls)) {
     e.onmouseenter = () => {
