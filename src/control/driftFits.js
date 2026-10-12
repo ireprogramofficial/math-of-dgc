@@ -7,6 +7,9 @@
 //   fit 3  a quadratic polynomial drift (12 parameters): a better match to the data, extrapolating very differently
 import { FlowField } from '../river/flowfield.js';
 
+/** Display names of the fitting methods (shared by both slides). */
+export const FIT_METHODS = { fit1: 'Moving average', fit2: 'Linear regression', fit3: 'Quadratic regression' };
+
 export const SERIES = { count: 26, every: 28, from: -40 }; // samples, seconds apart, start offset (m) below the fixed point
 const JITTER = 3;            // meters of measurement noise
 const MAX_SPEED = 1.6;       // fitted fields are clipped to a plausible speed (m/s) when extrapolated

@@ -196,3 +196,5 @@
 /* result readout on a map (bottom-center) */
 .map-result { color: var(--ink); font-weight: 700; font-size: 14px; }
 .map-result.bad { color: var(--bad); }
+.map-math-method { font-size: 14px; color: var(--ink); margin-top: 3px; font-family: "Source Sans Pro", system-ui, sans-serif; }
+.map-math-method b { color: var(--accent); }

@@ -10,7 +10,7 @@
 //          than fit 1, equally consistent with the data, and it extrapolates very differently
 // All three use only the samples: no knowledge of the channels, inlet, outlets, or the other basins.
 import katex from 'katex';
-import { makeDriftData } from '../control/driftFits.js';
+import { FIT_METHODS, makeDriftData } from '../control/driftFits.js';
 import { RiverView } from '../river/view.js';
 import { COLORS } from './draw.js';
 import { h } from './ui.js';
@@ -44,7 +44,9 @@ export function create(el) {
   function setMode(next) {
     mode = next;
     const m = MODES[mode];
-    label.innerHTML = katex.renderToString(m.tex, { throwOnError: false }) + (m.note ? `<div class="map-math-note">${m.note}</div>` : '');
+    label.innerHTML = katex.renderToString(m.tex, { throwOnError: false })
+      + (FIT_METHODS[mode] ? `<div class="map-math-method">Method: <b>${FIT_METHODS[mode]}</b></div>` : '')
+      + (m.note ? `<div class="map-math-note">${m.note}</div>` : '');
     buttons.forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
     if (!actual) return;
     view.setFlowHidden(mode === 'hidden');

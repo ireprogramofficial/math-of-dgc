@@ -5,7 +5,7 @@
 // the actual outcome is solid, played after the prediction completes. Planning with the actual drift is the baseline.
 import katex from 'katex';
 import { BoatModel, NU } from '../control/boat.js';
-import { makeDriftData } from '../control/driftFits.js';
+import { FIT_METHODS, makeDriftData } from '../control/driftFits.js';
 import { LiveBoat } from '../control/liveBoat.js';
 import { evaluate, makeProblem, TrajectoryOptimizer } from '../control/optimizer.js';
 import { RiverView } from '../river/view.js';
@@ -18,9 +18,9 @@ const GAP_SECONDS = 1.5;      // pause between the predicted path and the real o
 const HOLD_SECONDS = 3;       // pause at the end before replaying
 
 const MODES = {
-  fit1: { button: 'Plan with fit 1', tex: String.raw`\dot{x} = \hat{f}_1(x) + G\,u`, note: 'Planned with fit 1 (local average), run on the actual drift' },
-  fit2: { button: 'Plan with fit 2', tex: String.raw`\dot{x} = \hat{f}_2(x) + G\,u`, note: 'Planned with fit 2 (linear), run on the actual drift' },
-  fit3: { button: 'Plan with fit 3', tex: String.raw`\dot{x} = \hat{f}_3(x) + G\,u`, note: 'Planned with fit 3 (quadratic), run on the actual drift' },
+  fit1: { button: 'Plan with fit 1', tex: String.raw`\dot{x} = \hat{f}_1(x) + G\,u`, note: 'Planned with fit 1, run on the actual drift' },
+  fit2: { button: 'Plan with fit 2', tex: String.raw`\dot{x} = \hat{f}_2(x) + G\,u`, note: 'Planned with fit 2, run on the actual drift' },
+  fit3: { button: 'Plan with fit 3', tex: String.raw`\dot{x} = \hat{f}_3(x) + G\,u`, note: 'Planned with fit 3, run on the actual drift' },
   actual: { button: 'Plan with actual drift', tex: String.raw`\dot{x} = f(x) + G\,u`, note: 'Planned with the actual drift (the baseline)' },
 };
 
@@ -48,7 +48,9 @@ export function create(el) {
   function setMode(next) {
     mode = next;
     const m = MODES[mode];
-    label.innerHTML = katex.renderToString(m.tex, { throwOnError: false }) + `<div class="map-math-note">${m.note}</div>`;
+    label.innerHTML = katex.renderToString(m.tex, { throwOnError: false })
+      + (FIT_METHODS[mode] ? `<div class="map-math-method">Method: <b>${FIT_METHODS[mode]}</b></div>` : '')
+      + `<div class="map-math-note">${m.note}</div>`;
     buttons.forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
     if (!data) return;
     view.showField(mode === 'actual' ? actual : data.fits[mode]);
