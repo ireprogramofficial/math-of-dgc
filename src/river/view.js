@@ -97,6 +97,18 @@ export class RiverView {
   /** Hide (or show) everything that reveals the drift: streaks, speed colors, streamlines, legend. */
   setFlowHidden(hidden) { this.flowHidden = hidden; this._updateLegend(); }
 
+  /**
+   * Display a different field on the same river (e.g. a fitted drift), keeping the scenario and camera.
+   * Pass the scenario's own flow to go back. The field must share the scenario's grid (nx, ny, cell, inside).
+   */
+  showField(flow) {
+    this.flow = flow;
+    this.renderer.setFlow(flow);
+    this.particles?.setFlow(flow);
+    this.renderer.setStreamlines(SHOW_STREAMLINES && this.opts.streamlines !== false ? computeStreamlines(flow) : new Float32Array(0));
+    this._updateLegend();
+  }
+
   /** Extra legend rows: [{ color, tex, text }] drawn as an arrow plus a (KaTeX) label. */
   setLegendItems(items) { this.legendItems = items; this._updateLegend(); }
 
