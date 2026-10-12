@@ -151,7 +151,7 @@
               </div>
               <div class="defn element">
                 <dl>
-                  <dt>Data</dt><dd>Basin B: a time series \(x(t_0), x(t_1), \dots, x(t_N)\)<br>Basin A: a single sample</dd>
+                  <dt>Data</dt><dd>Basin A: a time series \(x(t_0), x(t_1), \dots, x(t_N)\)<br>Basin B: a single sample</dd>
                 </dl>
               </div>
               <p class="takeaway">In cell reprogramming we only get glimpses of how the system behaves naturally.</p>
@@ -159,7 +159,35 @@
           </div>
         </section>
 
-        <!-- 7 · The DGC problem P(R) and the data it relies on (from dgc-problem-statement-slide.pptx, slide 3) -->
+        <!-- 7 · Key challenge: optimal control with a fitted drift -->
+        <section data-prevent-swipe>
+          <div class="slide-head">
+            <div class="kicker">Key challenge</div>
+            <h2>Optimal control?</h2>
+          </div>
+          <div class="slide-body cols-map-side">
+            <div class="river-widget" data-widget="optimal"></div>
+            <div class="side">
+              <div class="defn">
+                <p class="defn-lead">Plan with a <b>fitted</b> drift \(\hat{f}\):</p>
+                $$\min_{u}\ \|x(T) - x_{\text{B}}\| \quad \text{s.t.}\quad \dot{x} = \hat{f}(x) + G(x)\,u$$
+                <dl>
+                  <dt>Start</dt><dd>\(x(0) = x(t_0)\), the first sample in basin A</dd>
+                  <dt>Target</dt><dd>\(x_{\text{B}}\), the single sample in basin B</dd>
+                  <dt>Constraints</dt><dd>\(0 \le u(t) \le 1\)</dd>
+                </dl>
+              </div>
+              <div class="defn element">
+                <dl>
+                  <dt>Then</dt><dd>run the same \(u\) on the actual drift:<br>\(\dot{x} = f(x) + G(x)\,u\)</dd>
+                </dl>
+              </div>
+              <p class="takeaway">An optimal plan is only as good as the drift it was planned on.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8 · The DGC problem P(R) and the data it relies on (from dgc-problem-statement-slide.pptx, slide 3) -->
         <section class="dgc-slide">
           <div class="dgc-wrap">
           <div class="dgc-problem">

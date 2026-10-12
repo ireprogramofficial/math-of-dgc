@@ -44,8 +44,9 @@ rest. On the map slides: **drag** to pan, **scroll** to zoom, **double-click** t
 | 3 | `control` | **Definition: a control system.** A boat steers itself between points (feedback autopilot, A* path plus pure pursuit) and pauses at each arrival. Hold **W A S D** or the on-screen pad to take over; after 7 s without input the autopilot resumes. No target or schedule is shown |
 | 4 | `loops` | **Key distinction: closed- versus open-loop.** Two block diagrams, and two boats leaving together for one target: open loop follows a precomputed schedule, closed loop reacts to its state. A gust pushes both; only the closed-loop boat recovers. Repeats; *Gust* and *Restart* buttons on the map |
 | 5 | `optimize` | **Definition: trajectory optimization** (state space, control space, objective, dynamics, constraints), solved live. Drag the target, disable thrusters, watch the plan change |
-| 6 | `unknown` | **Key challenge: unknown drift?** The triangle river with the flow hidden: a time series of samples circling basin 2's gyre and a single sample in basin 1 (generated from the true flow, with a little jitter). *Reveal f* shows the hidden flow. Mirrors cell reprogramming: we only glimpse the natural dynamics |
-| 7 | — | The DGC problem P(R) and the data it relies on |
+| 6 | `unknown` | **Key challenge: unknown drift?** The triangle river with the flow hidden: a time series of samples circling basin A's gyre and a single sample in basin B (generated from the true flow, with a little jitter). *Reveal f* shows the hidden flow. Mirrors cell reprogramming: we only glimpse the natural dynamics |
+| 7 | `optimal` | **Key challenge: optimal control?** Solve the trajectory optimization from basin A's first sample to basin B's single sample using a fitted drift (or the actual one, as a baseline), then run that schedule on the actual drift. Every fitted plan predicts a miss of a few meters and misses by 44-586 m in reality |
+| 8 | — | The DGC problem P(R) and the data it relies on |
 
 Every interactive slide shares one control bar (`src/widgets/mapControls.js`): **River**, **Color** (blues by default; rainbow, viridis,
 plasma, turbo, or none) and **Camera** (the river's scripted views, with *Overview* as home). Pan and zoom are always available on the map.

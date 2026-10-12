@@ -5,5 +5,6 @@ export const WIDGETS = {
   control: () => import('./control.js'),
   loops: () => import('./loops.js'),
   unknown: () => import('./unknownDrift.js'),
+  optimal: () => import('./optimalControl.js'),
   optimize: () => import('./optimize.js'),
 };

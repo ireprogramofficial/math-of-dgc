@@ -192,3 +192,7 @@
 .unknown { color: var(--bad); }
 .map-math-note { font-size: 13px; color: var(--muted); margin-top: 2px; font-family: "Source Sans Pro", system-ui, sans-serif; }
 .reveal .map-action.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* result readout on a map (bottom-center) */
+.map-result { color: var(--ink); font-weight: 700; font-size: 14px; }
+.map-result.bad { color: var(--bad); }
