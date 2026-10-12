@@ -101,7 +101,7 @@ export class BoatScene {
     this._notify();
   }
 
-  clearSchedule() { this._stopSolver(); this.U.fill(0); this.t = 0; this.playing = false; this._recompute(); this.timeline.setTime(0); this._notify(); }
+  clearSchedule() { this._stopSolver(); this.solved = null; this.U.fill(0); this.t = 0; this.playing = false; this._recompute(); this.timeline.setTime(0); this._notify(); }
 
   /** Fill the schedule from a function (k, N) -> [uN, uE, uS, uW]. */
   fill(fn) {

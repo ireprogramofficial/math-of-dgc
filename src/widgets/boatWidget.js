@@ -22,6 +22,7 @@ export function createBoatWidget(el, cfg) {
   const note = h('span', { class: 'readout', style: { color: COLORS.bad, fontWeight: 700 } });
   const playBtn = h('button', { type: 'button', class: 'map-action map-play' }, '▶ Play');
   const solveBtn = cfg.solve ? h('button', { type: 'button', class: 'primary' }, 'Solve') : null;
+  const resetBtn = h('button', { type: 'button', title: 'Set every thrust in the schedule back to zero' }, 'Reset schedule');
 
   const scene = new BoatScene(stage, timelineWrap, {
     scenario: cfg.scenario, draggableTarget: !!cfg.draggableTarget, editable: true,
@@ -57,6 +58,7 @@ export function createBoatWidget(el, cfg) {
       return b;
     }),
     solveBtn,
+    resetBtn,
     targetChips,
   );
   const info = h('div', { class: 'boat-toolbar info' },
@@ -72,6 +74,7 @@ export function createBoatWidget(el, cfg) {
 
   playBtn.addEventListener('click', () => (scene.playing ? scene.pause() : scene.play()));
   solveBtn?.addEventListener('click', () => scene.startSolve());
+  resetBtn.addEventListener('click', () => scene.clearSchedule());
   const mapControls = createMapControls(scene.view, {
     onScenario: async (id) => {
       await scene.setScenario(id);
