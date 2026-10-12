@@ -10,12 +10,13 @@
 //          than fit 1, equally consistent with the data, and it extrapolates very differently
 // All three use only the samples: no knowledge of the channels, inlet, outlets, or the other basins.
 import katex from 'katex';
-import { FIT_METHODS, makeDriftData } from '../control/driftFits.js';
+import { FIT_METHODS, ltvFields, makeDriftData } from '../control/driftFits.js';
 import { RiverView } from '../river/view.js';
 import { COLORS } from './draw.js';
 import { h } from './ui.js';
 
 const APPEAR_SECONDS = 0.18; // the samples arrive one by one
+const STEP_SECONDS = 0.7;    // fit 4 is time-varying: show each step's drift for this long, in a loop
 
 const MODES = {
   hidden: { tex: String.raw`\dot{x} = f(x), \quad f = \textcolor{#c0392b}{?}`, note: '' },
@@ -23,6 +24,7 @@ const MODES = {
   fit1: { button: 'Fit drift 1', tex: String.raw`\dot{x} = \hat{f}_1(x)`, note: 'Only where there is data; still water everywhere else' },
   fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x) = A\,x`, note: 'One linear model fit to the initial basin, extrapolated everywhere' },
   fit3: { button: 'Fit drift 3', tex: String.raw`\dot{x} = \hat{f}_3(x) = \text{quadratic in } x`, note: 'A richer model fit to the same samples, extrapolated everywhere' },
+  fit4: { button: 'Fit drift 4', tex: String.raw`x[k{+}1] = A[k]\,x[k]`, note: 'Exact on the data; a different drift at every time step' },
 };
 
 export function create(el) {
@@ -40,6 +42,7 @@ export function create(el) {
   el.append(stage);
 
   let series = [], single = null, shownAt = 0, actual = null, fits = null, mode = 'hidden';
+  let ltv = null, stepFields = null, step = -1, stepT0 = 0;
 
   function setMode(next) {
     mode = next;
@@ -50,14 +53,27 @@ export function create(el) {
     buttons.forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
     if (!actual) return;
     view.setFlowHidden(mode === 'hidden');
-    view.showField(mode === 'hidden' || mode === 'actual' ? actual : fits[mode]);
+    step = -1;
+    if (mode === 'fit4') { stepFields ??= ltvFields(actual, ltv); stepT0 = performance.now(); showStep(0); }
+    else view.showField(mode === 'hidden' || mode === 'actual' ? actual : fits[mode]);
+  }
+
+  // fit 4: the drift at step k is (A[k] - I)(x - x_bar)/dt; the streaks carry on as the field changes
+  function showStep(k) {
+    if (k === step) return;
+    step = k;
+    view.showField(stepFields[k], { streamlines: false, keepParticles: step > 0 });
+    const note = label.querySelector('.map-math-note');
+    if (note) note.textContent = `Exact on the data; a different drift at every time step (now k = ${k} of ${ltv.steps - 1})`;
   }
   setMode('hidden');
 
   view.onFlow = ((prev) => (flow, scn) => {
     prev?.(flow, scn);
     actual = flow;
-    ({ series, single, fits } = makeDriftData(flow, scn));
+    ({ series, single, fits, ltv } = makeDriftData(flow, scn));
+    stepFields = null;
+    setTimeout(() => { stepFields ??= ltvFields(actual, ltv); }, 400); // precompute fit 4's 25 fields off the click path
     shownAt = performance.now();
     setMode(mode);
   })(view.onFlow);
@@ -66,6 +82,7 @@ export function create(el) {
     if (!series.length) return;
     const cam = view.camera, p = [0, 0];
     const n = Math.min(series.length, Math.floor((performance.now() - shownAt) / 1000 / APPEAR_SECONDS) + 1);
+    if (mode === 'fit4') showStep(Math.floor((performance.now() - stepT0) / 1000 / STEP_SECONDS) % ltv.steps);
     ctx.save();
     // time series: light (early) to dark (late)
     for (let i = 0; i < n; i++) {
@@ -74,6 +91,13 @@ export function create(el) {
       ctx.fillStyle = `rgb(${Math.round(150 - 128 * t)}, ${Math.round(175 - 135 * t)}, ${Math.round(205 - 144 * t)})`;
       ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(p[0], p[1], 5.5, 0, 6.283); ctx.fill(); ctx.stroke();
+    }
+    // fit 4: highlight the two samples this step's A[k] was fit to (it maps x[k] exactly onto x[k+1])
+    if (mode === 'fit4' && step >= 0) {
+      const a = cam.worldToScreen(series[step][0], series[step][1], [0, 0]), b = cam.worldToScreen(series[step + 1][0], series[step + 1][1], [0, 0]);
+      ctx.strokeStyle = COLORS.thrust; ctx.lineWidth = 2.5;
+      for (const q of [a, b]) { ctx.beginPath(); ctx.arc(q[0], q[1], 9, 0, 6.283); ctx.stroke(); }
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
     }
     // the single sample
     cam.worldToScreen(single[0], single[1], p);

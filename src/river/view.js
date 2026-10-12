@@ -101,11 +101,13 @@ export class RiverView {
    * Display a different field on the same river (e.g. a fitted drift), keeping the scenario and camera.
    * Pass the scenario's own flow to go back. The field must share the scenario's grid (nx, ny, cell, inside).
    */
-  showField(flow) {
+  showField(flow, { streamlines = true, keepParticles = false } = {}) {
     this.flow = flow;
     this.renderer.setFlow(flow);
-    this.particles?.setFlow(flow);
-    this.renderer.setStreamlines(SHOW_STREAMLINES && this.opts.streamlines !== false ? computeStreamlines(flow) : new Float32Array(0));
+    // keepParticles: the streaks carry on into the new field (for fields that change every step)
+    if (this.particles) { if (keepParticles) this.particles.flow = flow; else this.particles.setFlow(flow); }
+    const lines = streamlines && SHOW_STREAMLINES && this.opts.streamlines !== false;
+    this.renderer.setStreamlines(lines ? computeStreamlines(flow) : new Float32Array(0));
     this._updateLegend();
   }
 
