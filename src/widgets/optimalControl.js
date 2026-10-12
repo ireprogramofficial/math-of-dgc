@@ -1,6 +1,6 @@
 // Slide: optimal control with a fitted drift. Same river and data as "Unknown drift?".
 // For the selected drift model we solve the trajectory optimization problem
-//   min ||x(T) - x_B||  s.t.  x' = f_hat(x) + G u,  x(0) = first sample of basin A's time series,  0 <= u <= 1
+//   min ||x(T) - x_target||  s.t.  x' = f_hat(x) + G u,  x(0) = first sample of the initial basin's time series,  0 <= u <= 1
 // then run the *same* schedule u on the actual drift. The planned path (what the model predicts) is dashed;
 // the actual outcome is solid, played after the prediction completes. Planning with the actual drift is the baseline.
 import katex from 'katex';
@@ -125,7 +125,7 @@ export function create(el) {
     const cam = view.camera, q = [0, 0];
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-    // the data, faintly: basin A's time series and basin B's single sample (the target)
+    // the data, faintly: the initial basin's time series and the target basin's single sample
     for (const s of data.series) {
       cam.worldToScreen(s[0], s[1], q);
       ctx.fillStyle = 'rgba(22,40,61,0.35)'; ctx.beginPath(); ctx.arc(q[0], q[1], 3.5, 0, 6.283); ctx.fill();
@@ -174,8 +174,8 @@ export function create(el) {
       ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.fillStyle = COLORS.ink;
       ctx.strokeText(text, q[0], q[1]); ctx.fillText(text, q[0], q[1]);
     };
-    caption('basin A: start', data.basinA.x + data.basinA.R + 12, data.basinA.y);
-    caption('basin B: target', data.basinB.x + data.basinB.R + 12, data.basinB.y);
+    caption('initial basin: start', data.basinInitial.x + data.basinInitial.R + 12, data.basinInitial.y);
+    caption('target basin', data.basinTarget.x + data.basinTarget.R + 12, data.basinTarget.y);
     ctx.restore();
   };
 

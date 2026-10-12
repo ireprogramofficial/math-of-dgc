@@ -24,11 +24,11 @@ function planAndRun(field) {
 }
 
 describe('drift fits', () => {
-  it('the time series circles basin A; the single sample sits in basin B', () => {
+  it('the time series circles the initial basin; the single sample sits in the target basin', () => {
     const near = (p, b) => Math.hypot(p[0] - b.x, p[1] - b.y) < b.R;
     expect(data.series.length).toBe(SERIES.count);
-    expect(data.series.every((p) => near(p, data.basinA))).toBe(true);
-    expect(near(data.single, data.basinB)).toBe(true);
+    expect(data.series.every((p) => near(p, data.basinInitial))).toBe(true);
+    expect(near(data.single, data.basinTarget)).toBe(true);
   });
 
   it('richer models match the samples better: quadratic < linear < local average', () => {

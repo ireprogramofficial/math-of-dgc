@@ -151,7 +151,7 @@
               </div>
               <div class="defn element">
                 <dl>
-                  <dt>Data</dt><dd>Basin A: a time series \(x(t_0), x(t_1), \dots, x(t_N)\)<br>Basin B: a single sample</dd>
+                  <dt>Data</dt><dd>Initial basin: a time series \(x(t_0), x(t_1), \dots, x(t_N)\)<br>Target basin: a single sample</dd>
                 </dl>
               </div>
               <p class="takeaway">In cell reprogramming we only get glimpses of how the system behaves naturally.</p>
@@ -170,10 +170,10 @@
             <div class="side">
               <div class="defn">
                 <p class="defn-lead">Plan with a <b>fitted</b> drift \(\hat{f}\):</p>
-                $$\min_{u}\ \|x(T) - x_{\text{B}}\| \quad \text{s.t.}\quad \dot{x} = \hat{f}(x) + G(x)\,u$$
+                $$\min_{u}\ \|x(T) - x_{\text{target}}\| \quad \text{s.t.}\quad \dot{x} = \hat{f}(x) + G(x)\,u$$
                 <dl>
-                  <dt>Start</dt><dd>\(x(0) = x(t_0)\), the first sample in basin A</dd>
-                  <dt>Target</dt><dd>\(x_{\text{B}}\), the single sample in basin B</dd>
+                  <dt>Start</dt><dd>\(x(0) = x(t_0)\), the first sample in the initial basin</dd>
+                  <dt>Target</dt><dd>\(x_{\text{target}}\), the single sample in the target basin</dd>
                   <dt>Constraints</dt><dd>\(0 \le u(t) \le 1\)</dd>
                 </dl>
               </div>

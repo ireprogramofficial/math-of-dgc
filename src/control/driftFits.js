@@ -1,7 +1,7 @@
 // Sampled data and fitted drifts for the "unknown drift" slides (pure JS: no DOM, so it is testable).
 //
-// The data: a time series that roughly circles basin A's fixed point (from the true flow, with a little jitter)
-// and a single sample in basin B. The fits use only the time series:
+// The data: a time series that roughly circles the initial basin's fixed point (from the true flow, with a little
+// jitter) and a single sample in the target basin. The fits use only the time series:
 //   fit 1  a kernel average of the sampled velocities: the gyre where there is data, still water everywhere else
 //   fit 2  one linear model  x' = A x + b, extrapolated everywhere (as DGC does with its A[k])
 //   fit 3  a quadratic polynomial drift (12 parameters): a better match to the data, extrapolating very differently
@@ -158,12 +158,12 @@ export function buildFits(actual, series, dt) {
 
 /**
  * Everything both slides need, from the scenario's actual flow (the triangle of gyres).
- * Basin A (time series) is the third swirl; basin B (single sample) is the second.
+ * The initial basin (time series) is the third swirl; the target basin (single sample) is the second.
  */
 export function makeDriftData(flow, scn) {
-  const [, bB, bA] = scn.swirls;
-  const cA = fixedPoint(flow, bA.x, bA.y), cB = fixedPoint(flow, bB.x, bB.y);
-  const series = jitter(sampleSeries(flow, [cA[0], cA[1] + SERIES.from], SERIES.count, SERIES.every), JITTER);
-  const single = jitter([[cB[0] + 30, cB[1] + 22]], JITTER)[0];
-  return { series, single, basinA: bA, basinB: bB, fits: buildFits(flow, series, SERIES.every) };
+  const [, bTarget, bInitial] = scn.swirls;
+  const cI = fixedPoint(flow, bInitial.x, bInitial.y), cT = fixedPoint(flow, bTarget.x, bTarget.y);
+  const series = jitter(sampleSeries(flow, [cI[0], cI[1] + SERIES.from], SERIES.count, SERIES.every), JITTER);
+  const single = jitter([[cT[0] + 30, cT[1] + 22]], JITTER)[0];
+  return { series, single, basinInitial: bInitial, basinTarget: bTarget, fits: buildFits(flow, series, SERIES.every) };
 }
