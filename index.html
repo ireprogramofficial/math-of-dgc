@@ -106,7 +106,7 @@
                 </div>
                 <div class="loop-note">\(u\) reacts to \(x\)</div>
               </div>
-              <p class="takeaway">The DGC algorithm is open loop.</p>
+              <p class="takeaway">The DGC algorithm is open loop.<span class="takeaway-why">We can't measure a cell's state and adjust doses as we go.</span></p>
             </div>
           </div>
         </section>
@@ -124,11 +124,13 @@
                 <p class="defn-lead">A <b>trajectory optimization problem</b> is an optimization problem on a control system:</p>
                 <dl class="numbered">
                   <dt>1. State space</dt><dd>\(X \subseteq \mathbb{R}^n\)</dd>
-                  <dt>2. Control space<br><span class="dt-sub">(decision space)</span></dt><dd>\(U \subseteq \mathbb{R}^m\),<br>\(u \in \mathcal{U} = \{\,u : [0,T] \to U\,\}\)</dd>
-                  <dt>3. Objective</dt><dd>\(\|x(T) - x_{\text{target}}\|\)</dd>
+                  <dt>2. Control space</dt><dd>\(U = [0,1]^m\)</dd>
+                  <dt class="dt-sub-row">Decision space</dt><dd>\(u \in \mathcal{U} = \{\,u : [0,T] \to U\,\}\)<br><span class="dd-note">in practice: piecewise constant, \(N \times m\) numbers</span></dd>
+                  <dt>3. Objective</dt><dd>\(\min_{u \in \mathcal{U}} \|x(T) - x_{\text{target}}\|\),<br>horizon \(T\) fixed</dd>
                   <dt>4. Dynamics</dt><dd>\(\dot{x} = f(x) + G(x)\,u(t)\)</dd>
-                  <dt>5. Constraints</dt><dd>\(x(0) = x_0\),<br>\(0 \le u(t) \le 1\)</dd>
+                  <dt>5. Constraints</dt><dd>\(x(0) = x_0\),<br>\(x(t) \in X\)</dd>
                 </dl>
+                <p class="defn-foot">The solver also adds a small effort term, and enforces \(x(t) \in X\) with a penalty.</p>
               </div>
             </div>
           </div>

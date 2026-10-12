@@ -177,6 +177,10 @@
 
 .defn dl.numbered { row-gap: 9px; }
 .dt-sub { font-weight: 400; font-size: 0.85em; color: var(--muted); }
+.defn dt.dt-sub-row { font-weight: 600; font-size: 0.92em; padding-left: 1.1em; }
+.dd-note { font-size: 0.85em; color: var(--muted); }
+.defn-foot { margin: 10px 0 0 !important; font-size: 0.8em; color: var(--muted); }
+.takeaway-why { display: block; margin-top: 4px; font-weight: 400; font-size: 0.72em; color: var(--muted); }
 
 /* ---------- DGC problem statement slide (no visualization) ---------- */
 .dgc-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; padding: 20px 40px; }
