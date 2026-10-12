@@ -22,29 +22,21 @@
           </div>
         </section>
 
-        <!-- 2 · Terrain: data → TADs → A_k (stages advance with the arrow keys) -->
+        <!-- 2 · Terrain: which Active data types become which DGC arrays -->
+        <section data-sec="terrain" data-label="Terrain · Data">
+          <h2 class="la-h">From data to arrays</h2>
+          <div class="la-body">
+            <div class="la-fill" data-widget="datamap"></div>
+          </div>
+        </section>
+
+        <!-- 3 · Terrain: data → TADs → A_k (stages advance with the arrow keys) -->
         <section data-sec="terrain" data-label="Terrain · Data → Fit">
           <h2 class="la-h">From measurements to transition matrices</h2>
           <div class="la-body">
             <div class="la-fill" data-widget="pipeline"></div>
           </div>
           <span class="fragment la-step"></span><span class="fragment la-step"></span><span class="fragment la-step"></span><span class="fragment la-step"></span>
-        </section>
-
-        <!-- 3 · Terrain: what one A_k does -->
-        <section data-sec="terrain" data-label="Terrain · Fit" data-prevent-swipe>
-          <h2 class="la-h">What one \(A_k\) does</h2>
-          <div class="la-body la-cols">
-            <div class="la-fill" data-widget="akmap"></div>
-            <div class="la-side">
-              <p class="la-lead">$$A_k = I + \frac{(\tilde e_{k+1} - \tilde e_k)\,\tilde e_k^{\mathsf T}}{\tilde e_k^{\mathsf T}\tilde e_k}$$</p>
-              <p><b>Exact</b> — \(\tilde e_k\) lands on \(\tilde e_{k+1}\). The step in the data is reproduced, not approximated.</p>
-              <p><b>Untouched</b> — every direction orthogonal to \(\tilde e_k\) is left alone <span class="la-key" style="--c:#2e8b57">green</span>.</p>
-              <p><b>One stretch</b> — the only eigenvalue that isn't 1 is \(\lambda\), along \(\tilde e_{k+1} - \tilde e_k\) <span class="la-key" style="--c:#7c3aed">purple</span>.</p>
-              <p><b>Closest to \(I\)</b> — no other matrix that sends \(\tilde e_k\) to \(\tilde e_{k+1}\) is nearer the identity.</p>
-              <p class="la-note">In the real model the same picture holds in the plane of \(\tilde e_k\) and \(\tilde e_{k+1}\); the other 2,094 directions orthogonal to \(\tilde e_k\) stay fixed.</p>
-            </div>
-          </div>
         </section>
 
         <!-- 4 · Optimization: the reachable cone and NNLS -->
