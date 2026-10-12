@@ -18,22 +18,6 @@
   "zero_pct": 25.92056856187291
  },
  {
-  "id": "g0",
-  "sym": "g_{\\text{initial}}",
-  "shape": [
-   14950
-  ],
-  "dims": [
-   "genes"
-  ],
-  "what": "initial cell type (log CP10K)",
-  "min": 0.0,
-  "median": 0.06354033689918713,
-  "mean": 0.2554048280583987,
-  "max": 5.461899263648848,
-  "zero_pct": 23.010033444816052
- },
- {
   "id": "gtarget",
   "sym": "g_{\\text{target}}",
   "shape": [
@@ -58,16 +42,15 @@
   "dims": [
    "genes"
   ],
-  "what": "accessibility in the initial cell type (1 = open)",
-  "min": 0.0,
-  "median": 1.0,
-  "mean": 0.9218729096989966,
-  "max": 1.0,
-  "zero_pct": 7.812709030100335
+  "what": "accessibility in the initial cell type",
+  "logical": {
+   "ones": 13782,
+   "zeros": 1168
+  }
  },
  {
-  "id": "C",
-  "sym": "C",
+  "id": "B",
+  "sym": "B",
   "shape": [
    14950,
    1606
@@ -98,25 +81,6 @@
    "repressor": 704,
    "unknown": 728,
    "expanded_columns": 2334
-  }
- },
- {
-  "id": "tad",
-  "sym": "\\mathrm{tad}(i)",
-  "shape": [
-   14950
-  ],
-  "dims": [
-   "genes"
-  ],
-  "what": "TAD containing each gene",
-  "n_tads": 2095,
-  "genes_per_tad": {
-   "min": 1.0,
-   "median": 3.0,
-   "mean": 7.136038186157518,
-   "max": 169.0,
-   "zero_pct": 0.0
   }
  }
 ]

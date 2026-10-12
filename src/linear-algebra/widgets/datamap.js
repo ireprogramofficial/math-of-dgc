@@ -30,16 +30,16 @@ const ARRAYS = {
   gtarget: { sym: 'g_{\\text{target}}', dims: 'N', sizes: fmtN(DIMS.N), what: 'The target cell type’s expression.' },
   lab: { sym: '\\text{labels}', dims: '', sizes: 'per sample', what: 'Which hour each column of G is, and which cells are the initial and the target type. They order and select samples; they add no numbers.' },
   a: { sym: 'a', dims: 'N', sizes: fmtN(DIMS.N), what: 'Accessibility per gene in the initial cell type: closed chromatin zeroes the gene’s row of the input.' },
-  C: { sym: 'C', dims: 'N \\times M', sizes: `${fmtN(DIMS.N)} × ${fmtN(DIMS.M)}`, what: 'Connections: which transcription factors target which genes.' },
+  B: { sym: 'B', dims: 'N \\times M', sizes: `${fmtN(DIMS.N)} × ${fmtN(DIMS.M)}`, what: 'Connections: which transcription factors target which genes.' },
   s: { sym: 's', dims: 'M', sizes: `${fmtN(DIMS.M)}, ±1`, what: 'Each factor’s direction: activator (+1) or repressor (−1).' },
-  tad: { sym: '\\mathrm{tad}(i)', dims: 'N \\to \\tilde N', sizes: `${fmtN(DIMS.N)} genes → 2,095 TADs`, what: 'Which TAD each gene sits in. Used later to pool G, g_target and C into TAD-level arrays.' },
+  tad: { sym: '\\mathrm{tad}(i)', dims: 'N \\to \\tilde N', sizes: `${fmtN(DIMS.N)} genes → 2,095 TADs`, what: 'Which TAD each gene sits in. Used later to pool G, g_target and B into TAD-level arrays.' },
 };
 
 const LINKS = [
   ['sc', 'G'], ['sc', 'g0'], ['sc', 'gtarget'],
   ['sn', 'G'], ['sn', 'g0'], ['sn', 'gtarget'],
   ['atac', 'a'],
-  ['chip', 'C'], ['tss', 'C'], ['ref', 'C'], ['ref', 's'],
+  ['chip', 'B'], ['tss', 'B'], ['ref', 'B'], ['ref', 's'],
   ['hic', 'tad'],
   ['meta', 'lab'],
 ];
@@ -47,12 +47,12 @@ const LINKS = [
 const NOTES = {
   sc: 'Single-cell expression: averaged per time point into the columns of G, and over the initial and target cell types into g_initial and g_target.',
   sn: 'Single-nucleus expression is interchangeable with single-cell here: whichever assay a dataset used feeds G, g_initial and g_target.',
-  tss: 'Transcription start sites define each gene’s promoter window, which decides which TF binding peaks count toward that gene’s row of C.',
+  tss: 'Transcription start sites define each gene’s promoter window, which decides which TF binding peaks count toward that gene’s row of B.',
   atac: 'Single-cell chromatin accessibility, measured in the initial cell type, gives a.',
-  chip: 'TF binding (ChIP-seq style) peaks near a gene are the core evidence for a connection in C.',
+  chip: 'TF binding (ChIP-seq style) peaks near a gene are the core evidence for a connection in B.',
   hic: 'Chromatin conformation calls the TAD boundaries; each gene falls in one TAD, giving tad(i).',
   meta: 'Phenotype and clinical records label the samples: the hour of each snapshot and the initial and target cell types.',
-  ref: 'Not a data type: motif counts and regulatory databases add evidence to C, and the curated literature sets each factor’s sign s.',
+  ref: 'Not a data type: motif counts and regulatory databases add evidence to B, and the curated literature sets each factor’s sign s.',
 };
 
 export function create(el) {
@@ -81,8 +81,8 @@ export function create(el) {
   }
 
   // Right side: rows of arrays, grouped as they are used.
-  // s sits beneath C, as in the pptx; a sits to C's right and takes its one link from above.
-  const rows = [['G', 'g0', 'gtarget'], ['lab'], ['C', 'a', 's'], ['tad']];
+  // s sits beneath B, as in the pptx; a sits to B's right and takes its one link from above.
+  const rows = [['G', 'g0', 'gtarget'], ['lab'], ['B', 'a', 's'], ['tad']];
   const arrEls = {};
   for (const r of rows) {
     const row = document.createElement('div');
@@ -112,9 +112,9 @@ export function create(el) {
     return { src, dst, p };
   });
   function layout() {
-    // s goes directly under C's glyph
-    const aCs = right.querySelector('.dm-row-Cas');
-    aCs.style.setProperty('--c-left', `${arrEls.C.offsetLeft}px`);
+    // s goes directly under B's glyph
+    const aCs = right.querySelector('.dm-row-Bas');
+    aCs.style.setProperty('--c-left', `${arrEls.B.offsetLeft}px`);
     const W = el.offsetWidth, H = el.offsetHeight;
     linksSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const wr = el.getBoundingClientRect();

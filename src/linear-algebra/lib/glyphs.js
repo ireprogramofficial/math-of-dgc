@@ -7,7 +7,7 @@ export function glyph(id) {
   const box = (x, y, w, h) => s('rect', { x, y, width: w, height: h, class: 'dm-box' }, svg);
   const rule = (x1, y1, x2, y2) => s('line', { x1, y1, x2, y2, class: 'dm-rule' }, svg);
   const set = (w, h) => { svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('width', w); svg.setAttribute('height', h); };
-  if (id === 'G' || id === 'C') {
+  if (id === 'G' || id === 'B') {
     const [w, h] = id === 'G' ? [92, 104] : [128, 104];
     set(w + 2, h + 2); box(1, 1, w, h);
     const n = id === 'G' ? 5 : 7;
