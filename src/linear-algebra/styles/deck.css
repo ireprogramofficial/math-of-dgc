@@ -224,3 +224,9 @@
 .de-bracket-text { font: 13px Arial, sans-serif; fill: var(--la-muted); text-anchor: middle; }
 .de-note { min-height: 52px; padding: 10px 14px; background: var(--la-wash); border-left: 4px solid var(--terrain); font-size: 18px; line-height: 1.3; }
 .de-note .dim { color: var(--la-muted); }
+.de-sep { stroke: var(--c, var(--la-ink)); stroke-width: 1.4; }
+.de-u .de-sep { stroke: var(--la-ink); }
+.de-B .de-top { position: relative; }
+.de-slice { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; display: flex; align-items: center; gap: 6px; font-size: 11px; line-height: 1.2; text-align: left; color: var(--la-muted); }
+.de-slice-box { fill: #fff; stroke: var(--la-ink); stroke-width: 1.2; }
+.de-slice-col { fill: var(--optimization); }
