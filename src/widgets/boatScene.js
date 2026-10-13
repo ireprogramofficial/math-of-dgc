@@ -216,14 +216,14 @@ export class BoatScene {
       ctx.setLineDash([]);
     }
 
-    // planned path (full), then the traveled part on top
+    // planned path (full), then the traveled part on top: the open-loop plan's color, as on the closed/open-loop slide
     ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(255,255,255,0.85)';
     this._stroke(ctx, e.X, 0, e.M, cam);
-    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(216,87,42,0.45)';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(192,61,143,0.45)';
     this._stroke(ctx, e.X, 0, e.M, cam);
 
     const pose = this._pose(this.t);
-    ctx.lineWidth = 4; ctx.strokeStyle = COLORS.thrust;
+    ctx.lineWidth = 4; ctx.strokeStyle = COLORS.open;
     this._stroke(ctx, e.X, 0, Math.max(pose.j, 1), cam);
 
     // aground segments in red
@@ -264,10 +264,10 @@ export class BoatScene {
     ctx.save();
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath(); ctx.arc(p[0], p[1], 10, 0, 6.283); ctx.stroke();
-    ctx.lineWidth = 2; ctx.strokeStyle = label === 'target' ? COLORS.thrust : COLORS.ink;
+    ctx.lineWidth = 2; ctx.strokeStyle = COLORS.ink;
     ctx.beginPath(); ctx.arc(p[0], p[1], 10, 0, 6.283); ctx.stroke();
-    if (label === 'target') { ctx.fillStyle = COLORS.thrust; ctx.beginPath(); ctx.arc(p[0], p[1], 3.5, 0, 6.283); ctx.fill(); }
-    if (draggable) { ctx.setLineDash([3, 3]); ctx.strokeStyle = COLORS.thrust; ctx.beginPath(); ctx.arc(p[0], p[1], 17, 0, 6.283); ctx.stroke(); }
+    if (label === 'target') { ctx.fillStyle = COLORS.ink; ctx.beginPath(); ctx.arc(p[0], p[1], 3.5, 0, 6.283); ctx.fill(); }
+    if (draggable) { ctx.setLineDash([3, 3]); ctx.strokeStyle = COLORS.ink; ctx.beginPath(); ctx.arc(p[0], p[1], 17, 0, 6.283); ctx.stroke(); }
     ctx.font = '700 12px "Source Sans Pro", system-ui, sans-serif';
     ctx.textAlign = 'center'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.fillStyle = COLORS.ink;
     ctx.setLineDash([]);

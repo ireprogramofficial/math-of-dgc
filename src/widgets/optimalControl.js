@@ -29,7 +29,7 @@ export function create(el) {
   const stage = h('div', { class: 'stage' });
   const view = new RiverView(stage, { scenario: 'triangle', interactive: true, labels: false });
   view.setLegendItems([
-    { color: COLORS.thrust, text: 'planned (model)', dash: true },
+    { color: COLORS.open, text: 'planned (model)', dash: true },
     { color: COLORS.ink, text: 'actual outcome' },
   ]);
   const label = h('div', { class: 'map-math' });
@@ -143,9 +143,9 @@ export function create(el) {
 
       const shownPlan = upTo(planned, fPlan);
       path(ctx, shownPlan, 'rgba(255,255,255,0.9)', 5, []);
-      path(ctx, shownPlan, COLORS.thrust, 2.5, [5, 6]);
+      path(ctx, shownPlan, COLORS.open, 2.5, [5, 6]);
       cam.worldToScreen(shownPlan[shownPlan.length - 1][0], shownPlan[shownPlan.length - 1][1], q);
-      boatGlyph(ctx, q[0], q[1], head(shownPlan, shownPlan.length - 1), 1.3, fReal === 0, COLORS.thrust);
+      boatGlyph(ctx, q[0], q[1], head(shownPlan, shownPlan.length - 1), 1.3, fReal === 0, COLORS.open);
 
       if (fReal > 0) {
         const shownReal = upTo(p.real, fReal);

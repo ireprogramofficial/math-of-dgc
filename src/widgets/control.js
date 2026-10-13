@@ -1,4 +1,4 @@
-// Slide: a control system. An open-loop autopilot cycles the thrust direction; hold W A S D (or the on-screen pad) to take over.
+// Slide: a control system. An open-loop schedule u(t) cycles the thrust direction; hold W A S D (or the on-screen pad) to take over.
 import { DIRS } from '../control/boat.js';
 import { COLORS } from './draw.js';
 import { createMapControls } from './mapControls.js';
@@ -47,7 +47,7 @@ export function create(el) {
     uReadout.set(u);
     readout.set(scene.boat.x);
     if (mode !== lastMode) { chip.dataset.mode = mode; lastMode = mode; }
-    const text = mode === 'manual' ? `Manual steering · autopilot resumes in ${Math.ceil(secondsLeft)} s` : `Autopilot (open loop) · full thrust ${dir}`;
+    const text = mode === 'manual' ? `Manual steering · schedule resumes in ${Math.ceil(secondsLeft)} s` : `Schedule u(t) (open loop) · full thrust ${dir}`;
     if (text !== lastText) { chip.textContent = text; lastText = text; }
   }
 

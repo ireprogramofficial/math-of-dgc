@@ -69,6 +69,7 @@ export function createBoatWidget(el, cfg) {
     { color: COLORS.water, text: 'drift', tex: 'f(x)' },
     { color: COLORS.thrust, text: 'thrust', tex: 'G(x)\\,u' },
     { color: COLORS.ink, text: 'boat velocity', tex: '\\dot{x}' },
+    { color: COLORS.open, text: 'planned path' },
     { color: COLORS.ink, text: 'drift-only path', dash: true },
   ]);
 
