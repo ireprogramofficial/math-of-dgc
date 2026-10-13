@@ -34,6 +34,11 @@
 .slide-head { padding-top: 10px; height: 80px; }
 .slide-body { position: absolute; left: 12px; right: 12px; top: 94px; bottom: 14px; display: grid; gap: 16px; }
 .slide-body.cols-map-side { grid-template-columns: minmax(0, 1fr) 380px; }
+/* a definition on its own slide: centered, large */
+.slide-body.defn-solo { place-items: center; }
+.defn-solo .defn { width: min(1000px, 100%); padding: 32px 44px; font-size: 1.2em; border-radius: 16px; }
+.defn-solo .defn-lead { margin-bottom: 22px !important; }
+.defn-solo .defn dl.numbered { row-gap: 20px; column-gap: 34px; }
 .side { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden; font-size: 0.68em; }
 .side h3 { font-size: 1.1em; color: var(--accent2); margin-top: 4px; }
 .side p { margin: 0; }
