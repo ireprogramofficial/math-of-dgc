@@ -11,7 +11,15 @@ import { createMapControls } from './mapControls.js';
 import { createStateReadout } from './stateReadout.js';
 import { h } from './ui.js';
 
-const PROBE_SECONDS = 8, FADE_SECONDS = 1.5, TIME_SCALE = 40, MAX_STEP = 0.5;
+const PROBE_SECONDS = 8, FADE_SECONDS = 1.5, MAX_STEP = 0.5;
+
+// Sim seconds per real second for the probe: the particles' clock. They move at pxPerSec on screen in the fastest
+// water (speedRef) at any zoom, so at the current zoom one real second is pxPerSec / (zoom * speedRef) sim seconds
+// there, and the probe keeps pace with them (in slower water the particles' minimum speed keeps them a bit ahead).
+function particleTimeScale(view) {
+  const ps = view.particles, z = view.camera.zoom, ref = view.flow?.speedRef;
+  return ps && z > 0 && ref > 0 ? ps.pxPerSec / (z * ref) : 40;
+}
 
 export function create(el) {
   el.classList.add('map-widget', 'gallery');
@@ -54,10 +62,10 @@ function addProbe(view, stage) {
 
   view.onDraw = (ctx, v, now, dt) => {
     if (!probe) return;
-    dt = Math.min(dt, 0.12);
-    probe.age += dt;
+    probe.age += Math.min(dt, 0.12); // lifetime in real seconds
     if (probe.age > PROBE_SECONDS) { probe = null; readout.hide(); return; }
-    const sim = dt * TIME_SCALE, n = Math.max(1, Math.ceil(sim / MAX_STEP));
+    // motion uses the particles' frame cap, so a slow frame rate slows both alike
+    const sim = Math.min(dt, 0.05) * particleTimeScale(view), n = Math.max(1, Math.ceil(sim / MAX_STEP));
     for (let i = 0; i < n; i++) probe.boat.step(zero, sim / n);
     const x = probe.boat.x, last = probe.pts[probe.pts.length - 1];
     if (Math.hypot(x[0] - last[0], x[1] - last[1]) > 3) probe.pts.push([x[0], x[1]]);
