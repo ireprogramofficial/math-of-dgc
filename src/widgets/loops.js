@@ -1,13 +1,13 @@
-// Slide: closed- versus open-loop. Two boats leave together for the same target.
-//   open loop   follows a thrust schedule computed in advance (the optimizer's plan)
-//   closed loop measures its state and reacts (the autopilot, with the target as its fixed destination)
-// Partway through, a gust pushes both boats sideways. The open-loop boat keeps executing its plan and misses;
-// the closed-loop boat corrects. Then the run repeats.
+// Slide: open- versus closed-loop. Two boats leave together with the same plan (the optimizer's schedule).
+//   open loop   executes the plan's thrust schedule u_plan(t), whatever happens
+//   closed loop the same plan plus feedback: G u = G u_plan(t) + k (x_plan(t) - x)   (see control/tracking.js)
+// Without a disturbance the two coincide exactly. Partway through, a gust pushes both boats sideways: the open-loop
+// boat keeps executing its plan and misses; the closed-loop boat is steered back onto the plan. Then the run repeats.
 
-import { Autopilot } from '../control/autopilot.js';
 import { BoatModel, NU, NX } from '../control/boat.js';
 import { LiveBoat } from '../control/liveBoat.js';
 import { evaluate, makeProblem, TrajectoryOptimizer } from '../control/optimizer.js';
+import { makeLoops } from '../control/tracking.js';
 import { autopilotGuess } from '../control/warmStart.js';
 import { RiverView } from '../river/view.js';
 import { arrow, boatGlyph, COLORS } from './draw.js';
@@ -53,6 +53,7 @@ export function create(el) {
       st.U = Float64Array.from(opt.U);
       st.planned = evaluate(st.problem, st.U).X;
       st.M = st.planned.length / NX - 1;
+      st.loops = makeLoops(st.model, st.problem, st.U, st.planned);
       reset();
       st.ready = true;
     };
@@ -61,11 +62,9 @@ export function create(el) {
 
   function reset() {
     const { model, problem } = st, scn = view.scenario;
-    st.t = 0; st.acc = 0; st.h = problem.T / (problem.N * problem.sub);
+    st.t = 0; st.j = 0; st.acc = 0; st.h = problem.T / (problem.N * problem.sub);
     st.ol = new LiveBoat(model); st.ol.reset(scn.boat.start);
     st.cl = new LiveBoat(model); st.cl.reset(scn.boat.start);
-    st.pilot = new Autopilot(model.flow, scn, model, { cruise: 3.2 });
-    st.pilot.goTo(problem.target, scn.boat.start);
     st.gust = null; st.autoGusted = false;
     st.trails = [[], []];
   }
@@ -84,21 +83,19 @@ export function create(el) {
 
   const u = new Float64Array(NU);
   function advance(dt) {
-    const { problem } = st, T = problem.T, dtU = T / problem.N;
+    const { problem } = st, T = problem.T;
     st.acc += Math.min(dt, 0.12) * TIME_SCALE;
     while (st.acc >= st.h) {
       st.acc -= st.h;
       if (!st.autoGusted && st.t >= GUST.at * T) { st.autoGusted = true; startGust(); }
-      const k = Math.floor(st.t / dtU);
-      for (let c = 0; c < NU; c++) u[c] = k < problem.N ? st.U[NU * k + c] : 0;
-      st.ol.step(u, st.h);
-      st.cl.step(st.pilot.control(st.cl.x, st.h), st.h);
+      st.ol.step(st.loops.uPlan(st.j, u), st.h);          // open loop: the schedule, fixed in advance
+      st.cl.step(st.loops.track(st.j, st.cl.x), st.h);   // closed loop: the schedule plus feedback on x
       if (st.gust) {
         for (const b of [st.ol, st.cl]) b.push(st.gust.vx * st.h, st.gust.vy * st.h);
         st.gust.left -= st.h;
         if (st.gust.left <= 0) st.gust = null;
       }
-      st.t += st.h;
+      st.t += st.h; st.j++;
       [st.ol, st.cl].forEach((b, i) => {
         const tr = st.trails[i], last = tr[tr.length - 1];
         if (!last || Math.hypot(last[0] - b.x[0], last[1] - b.x[1]) > 4) tr.push([b.x[0], b.x[1]]);
@@ -126,11 +123,11 @@ export function create(el) {
     line(ctx, planIdx, (j) => [P[NX * j], P[NX * j + 1]], 'rgba(255,255,255,0.9)', 5);
     line(ctx, planIdx, (j) => [P[NX * j], P[NX * j + 1]], COLORS.open, 2, [3, 6]);
 
-    // trails
+    // trails: closed loop thinner, on top, so both stay visible where they coincide
     st.trails.forEach((tr, i) => {
       if (tr.length < 2) return;
-      line(ctx, tr, (q) => q, 'rgba(255,255,255,0.85)', 6);
-      line(ctx, tr, (q) => q, i ? COLORS.closed : COLORS.open, 3);
+      line(ctx, tr, (q) => q, 'rgba(255,255,255,0.85)', i ? 4 : 7);
+      line(ctx, tr, (q) => q, i ? COLORS.closed : COLORS.open, i ? 2 : 5);
     });
 
     // target
@@ -145,7 +142,7 @@ export function create(el) {
       if (st.gust) arrow(ctx, p[0], p[1], st.gust.vx * 30, -st.gust.vy * 30, 'rgba(22,40,61,0.55)', 5, 12);
       const sp = Math.hypot(b.v[0], b.v[1]);
       b._ang = sp > 0.15 ? Math.atan2(-b.v[1], b.v[0]) : b._ang ?? 0;
-      boatGlyph(ctx, p[0], p[1], b._ang, 1.5, true, i ? COLORS.closed : COLORS.open);
+      boatGlyph(ctx, p[0], p[1], b._ang, i ? 1.15 : 1.75, true, i ? COLORS.closed : COLORS.open); // closed on top, smaller
     });
     if (st.gust) {
       const p = cam.worldToScreen(st.ol.x[0], st.ol.x[1], [0, 0]);
