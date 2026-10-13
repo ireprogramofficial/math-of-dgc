@@ -2,7 +2,8 @@
 //   open loop   executes the plan's thrust schedule u_plan(t), whatever happens
 //   closed loop the same plan plus feedback: G u = G u_plan(t) + k (x_plan(t) - x)   (see control/tracking.js)
 // Without a disturbance the two coincide exactly. Partway through, a gust pushes both boats sideways: the open-loop
-// boat keeps executing its plan and misses; the closed-loop boat is steered back onto the plan. Then the run repeats.
+// boat keeps executing its plan and misses; the closed-loop boat is steered back onto the plan. At the horizon T the run
+// stops (the problem is defined on [0, T]): both boats stay where they are for a moment, then the run repeats.
 
 import { BoatModel, NU, NX } from '../control/boat.js';
 import { LiveBoat } from '../control/liveBoat.js';
@@ -16,7 +17,7 @@ import { h } from './ui.js';
 
 const TIME_SCALE = 35;        // sim seconds per real second
 const GUST = { at: 0.3, duration: 40, speed: 2 }; // fraction of horizon, sim seconds, m/s of sideways push
-const LINGER = 0.3;           // extra fraction of the horizon to watch after the plan ends
+const LINGER = 0.3;           // extra fraction of the horizon to show the boats where they ended, at T
 
 export function create(el) {
   el.classList.add('map-widget', 'gallery');
@@ -87,6 +88,7 @@ export function create(el) {
     st.acc += Math.min(dt, 0.12) * TIME_SCALE;
     while (st.acc >= st.h) {
       st.acc -= st.h;
+      if (st.j >= st.loops.M) { st.gust = null; st.t += st.h; continue; } // past T: frozen where they ended
       if (!st.autoGusted && st.t >= GUST.at * T) { st.autoGusted = true; startGust(); }
       st.ol.step(st.loops.uPlan(st.j, u), st.h);          // open loop: the schedule, fixed in advance
       st.cl.step(st.loops.track(st.j, st.cl.x), st.h);   // closed loop: the schedule plus feedback on x
