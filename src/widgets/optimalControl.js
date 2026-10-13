@@ -58,12 +58,20 @@ export function create(el) {
     showResult();
   }
 
+  // The result card: the planned trajectory's miss, then (once the real outcome plays) the actual one's.
+  let resultKey = '';
+  function setResult(p, showActual) {
+    const key = !p || p === 'pending' ? 'pending' : `${mode}|${p.plannedMiss.toFixed(0)}|${showActual ? p.realMiss.toFixed(0) : ''}`;
+    if (key === resultKey) return;
+    resultKey = key;
+    if (key === 'pending') { result.innerHTML = '<div class="res-line">Planning…</div>'; return; }
+    const bad = p.realMiss > 25 ? ' bad' : '';
+    result.innerHTML = `<div class="res-line"><span class="res-swatch planned"></span>Planned trajectory — misses by ${p.plannedMiss.toFixed(0)} m</div>`
+      + (showActual ? `<div class="res-line"><span class="res-swatch actual"></span>Same plan but Actual trajectory — misses by <b class="res-miss${bad}">${p.realMiss.toFixed(0)} m</b></div>` : '');
+  }
 
   function showResult() {
-    const p = plans[mode];
-    // the actual miss is only revealed once the real outcome plays (see onDraw)
-    result.textContent = !p || p === 'pending' ? 'Planning…' : `Planned miss ${p.plannedMiss.toFixed(0)} m`;
-    result.classList.remove('bad');
+    setResult(plans[mode], false); // the actual miss is only revealed once the real outcome plays (see onDraw)
   }
 
   // Solve one plan in short chunks (keeps the page responsive), then run it on the actual drift.
@@ -154,10 +162,7 @@ export function create(el) {
         cam.worldToScreen(shownReal[shownReal.length - 1][0], shownReal[shownReal.length - 1][1], q);
         boatGlyph(ctx, q[0], q[1], head(shownReal, shownReal.length - 1), 1.5, true, '#ffffff');
       }
-      result.textContent = fReal === 0
-        ? `Planned miss ${p.plannedMiss.toFixed(0)} m`
-        : `Planned miss ${p.plannedMiss.toFixed(0)} m  ·  actual miss ${p.realMiss.toFixed(0)} m`;
-      result.classList.toggle('bad', fReal > 0 && p.realMiss > 25);
+      setResult(p, fReal > 0);
     }
     // start and target
     cam.worldToScreen(data.series[0][0], data.series[0][1], q);

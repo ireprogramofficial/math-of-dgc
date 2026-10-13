@@ -204,8 +204,11 @@
 .reveal .map-action.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
 /* result readout on a map (bottom-center) */
-.map-result { color: var(--ink); font-weight: 700; font-size: 14px; }
-.map-result.bad { color: var(--bad); }
+.map-result { left: 57%; bottom: 14px; padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.96); box-shadow: 0 2px 12px rgba(20,40,70,0.22); color: var(--ink); font-size: 17px; font-weight: 600; text-align: left; white-space: nowrap; }
+.map-result .res-line + .res-line { margin-top: 4px; }
+.res-swatch { display: inline-block; width: 26px; height: 0; margin-right: 10px; vertical-align: middle; border-top: 3px solid var(--ink); }
+.res-swatch.planned { border-top: 3px dashed #c03d8f; }
+.res-miss.bad { color: var(--bad); }
 .map-math-method { font-size: 14px; color: var(--ink); margin-top: 3px; font-family: "Source Sans Pro", system-ui, sans-serif; }
 .map-math-method b { color: var(--accent); }
 .map-actions-label { align-self: center; font-size: 13px; font-weight: 700; color: var(--ink); background: rgba(255,255,255,0.85); padding: 2px 6px; border-radius: 6px; }
