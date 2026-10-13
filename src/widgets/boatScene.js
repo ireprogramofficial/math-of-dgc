@@ -209,9 +209,11 @@ export class BoatScene {
 
     // ghost: where the water alone would take the boat
     if (this.opts.showGhost && this.ghost) {
-      ctx.setLineDash([2, 7]);
-      ctx.strokeStyle = 'rgba(22,40,61,0.55)';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(255,255,255,0.7)'; // halo, so the dashes read over the streaks
+      this._stroke(ctx, this.ghost, 0, e.M, cam);
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = 'rgba(22,40,61,0.9)';
+      ctx.lineWidth = 3;
       this._stroke(ctx, this.ghost, 0, e.M, cam);
       ctx.setLineDash([]);
     }
@@ -262,6 +264,7 @@ export class BoatScene {
   _marker(ctx, cam, x, y, label, draggable) {
     const p = cam.worldToScreen(x, y, [0, 0]);
     ctx.save();
+    if (label === 'target') { this._target(ctx, p, draggable); ctx.restore(); return; }
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath(); ctx.arc(p[0], p[1], 10, 0, 6.283); ctx.stroke();
     ctx.lineWidth = 2; ctx.strokeStyle = COLORS.ink;
@@ -273,6 +276,19 @@ export class BoatScene {
     ctx.setLineDash([]);
     ctx.strokeText(label, p[0], p[1] - 24); ctx.fillText(label, p[0], p[1] - 24);
     ctx.restore();
+  }
+
+  /** The target: a bold bullseye on a white disc, so it reads over the streaks at any zoom. */
+  _target(ctx, p, draggable) {
+    const ring = (r, w, color) => { ctx.lineWidth = w; ctx.strokeStyle = color; ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 6.283); ctx.stroke(); };
+    ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.beginPath(); ctx.arc(p[0], p[1], 16, 0, 6.283); ctx.fill();
+    ring(15, 3.5, COLORS.ink);
+    ring(8, 2.5, COLORS.ink);
+    ctx.fillStyle = COLORS.ink; ctx.beginPath(); ctx.arc(p[0], p[1], 3.5, 0, 6.283); ctx.fill();
+    if (draggable) { ctx.setLineDash([4, 4]); ring(23, 2, COLORS.ink); ctx.setLineDash([]); }
+    ctx.font = '700 14px "Source Sans Pro", system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.fillStyle = COLORS.ink;
+    ctx.strokeText('target', p[0], p[1] - 31); ctx.fillText('target', p[0], p[1] - 31);
   }
 
   _boat(ctx, x, y, ang, speed) {
