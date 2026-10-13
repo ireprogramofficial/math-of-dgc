@@ -36,8 +36,8 @@
 .slide-body.cols-map-side { grid-template-columns: minmax(0, 1fr) 380px; }
 /* a definition on its own slide: centered, large */
 .slide-body.defn-solo { place-items: center; }
-.defn-solo .defn { width: min(880px, 100%); padding: 28px 38px; font-size: 1.02em; border-radius: 16px; }
-.defn-solo .defn-lead { margin-bottom: 18px !important; }
+.defn-solo .defn { width: min(945px, 100%); padding: 28px 38px; font-size: 1.02em; border-radius: 16px; }
+.defn-solo .defn-lead { margin-bottom: 18px !important; white-space: nowrap; letter-spacing: -0.005em; }
 .defn-solo .defn dl.numbered { row-gap: 16px; column-gap: 30px; }
 .side { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden; font-size: 0.68em; }
 .side h3 { font-size: 1.1em; color: var(--accent2); margin-top: 4px; }
