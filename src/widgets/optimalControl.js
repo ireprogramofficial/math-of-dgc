@@ -3,12 +3,9 @@
 //   min ||x(T) - x_target||  s.t.  x' = f_hat(x) + G u,  x(0) = first sample of the initial basin's time series,  0 <= u <= 1
 // then run the *same* schedule u on the actual drift. The planned path (what the model predicts) is dashed;
 // the actual outcome is solid, played after the prediction completes. Planning with the actual drift is the baseline.
-// Fit 4 (DGC-style, rank-one time-varying) is planned in its own first-order model by bounded nonnegative least
-// squares over K steps of the data's sampling interval, then run on the actual boat the same way.
 import katex from 'katex';
 import { BoatModel, NU, NX } from '../control/boat.js';
-import { FIT_METHODS, ltvFields, makeDriftData, SERIES } from '../control/driftFits.js';
-import { planLTV, thrustMatrix } from '../control/rankOneLTV.js';
+import { FIT_METHODS, makeDriftData } from '../control/driftFits.js';
 import { LiveBoat } from '../control/liveBoat.js';
 import { evaluate, makeProblem, TrajectoryOptimizer } from '../control/optimizer.js';
 import { RiverView } from '../river/view.js';
@@ -24,10 +21,8 @@ const MODES = {
   fit1: { button: 'Fit drift 1', tex: String.raw`\dot{x} = \hat{f}_1(x) + G\,u`, note: 'Planned with fit 1, run on the actual drift' },
   fit2: { button: 'Fit drift 2', tex: String.raw`\dot{x} = \hat{f}_2(x) + G\,u`, note: 'Planned with fit 2, run on the actual drift' },
   fit3: { button: 'Fit drift 3', tex: String.raw`\dot{x} = \hat{f}_3(x) + G\,u`, note: 'Planned with fit 3, run on the actual drift' },
-  fit4: { button: 'Fit drift 4', tex: String.raw`x[k{+}1] = A[k]\,x[k] + B\,u[k]`, note: 'Planned with fit 4 (bounded NNLS), run on the actual drift' },
   actual: { button: 'Actual drift', tex: String.raw`\dot{x} = f(x) + G\,u`, note: 'Planned with the actual drift (the baseline)' },
 };
-const LTV_STEPS = Math.round(HORIZON / SERIES.every); // fit 4 plans over whole sampling intervals (18 x 28 s = 504 s)
 
 export function create(el) {
   el.classList.add('map-widget', 'gallery');
@@ -48,7 +43,6 @@ export function create(el) {
   el.append(stage);
 
   let data = null, actual = null, mode = 'fit1', token = 0, t0 = performance.now();
-  let stepFields = null, step = -1; // fit 4's drift changes every step
   const plans = {}; // mode -> { planned: Float64Array X, real: [[x, y]...], plannedMiss, realMiss } | 'pending'
 
   function setMode(next) {
@@ -59,18 +53,11 @@ export function create(el) {
       + `<div class="map-math-note">${m.note}</div>`;
     buttons.forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
     if (!data) return;
-    step = -1;
-    if (mode === 'fit4') { stepFields ??= ltvFields(actual, data.ltv); showStep(0); }
-    else view.showField(mode === 'actual' ? actual : data.fits[mode]);
+    view.showField(mode === 'actual' ? actual : data.fits[mode]);
     t0 = performance.now();
     showResult();
   }
 
-  function showStep(k) {
-    if (k === step) return;
-    step = k;
-    view.showField(stepFields[k], { streamlines: false, keepParticles: k > 0 });
-  }
 
   function showResult() {
     const p = plans[mode];
@@ -81,7 +68,6 @@ export function create(el) {
 
   // Solve one plan in short chunks (keeps the page responsive), then run it on the actual drift.
   function plan(key, my, done) {
-    if (key === 'fit4') { planFit4(); setTimeout(done, 0); return; }
     const field = key === 'actual' ? actual : data.fits[key];
     const start = data.series[0], target = data.single;
     const scn = { ...view.scenario, boat: { start, target, horizon: HORIZON } };
@@ -114,26 +100,10 @@ export function create(el) {
     step();
   }
 
-  // Fit 4: plan in the rank-one LTV model (bounded NNLS), then hold each step's thrust for one sampling interval on the boat.
-  function planFit4() {
-    const start = data.series[0], target = data.single, dt = SERIES.every;
-    const res = planLTV(data.ltv, thrustMatrix(new BoatModel(actual), dt), start, target, LTV_STEPS);
-    const boat = new LiveBoat(new BoatModel(actual)), u = new Float64Array(NU), hh = 0.5, sub = Math.round(dt / hh);
-    boat.x.set(start);
-    const real = [[start[0], start[1]]];
-    for (let k = 0; k < LTV_STEPS; k++) {
-      for (let c = 0; c < NU; c++) u[c] = res.U[NU * k + c];
-      for (let j = 0; j < sub; j++) { boat.step(u, hh); real.push([boat.x[0], boat.x[1]]); }
-    }
-    plans.fit4 = { planned: res.path, real, plannedMiss: res.plannedMiss, realMiss: Math.hypot(boat.x[0] - target[0], boat.x[1] - target[1]) };
-    if (mode === 'fit4') { t0 = performance.now(); showResult(); }
-  }
-
   view.onFlow = ((prev) => (flow, scn) => {
     prev?.(flow, scn);
     actual = flow;
     data = makeDriftData(flow, scn);
-    stepFields = null;
     const my = ++token;
     // plan the selected mode first, then the rest in the background
     const order = [mode, ...Object.keys(MODES).filter((k) => k !== mode)];
@@ -168,8 +138,6 @@ export function create(el) {
       if (t > 2 * PLAY_SECONDS + GAP_SECONDS + HOLD_SECONDS) { t0 = performance.now(); t = 0; }
       const fPlan = Math.min(t / PLAY_SECONDS, 1);
       const fReal = Math.min(Math.max((t - PLAY_SECONDS - GAP_SECONDS) / PLAY_SECONDS, 0), 1);
-      // fit 4: show the drift of the step being played (prediction first, then the real run)
-      if (mode === 'fit4' && stepFields) showStep(Math.min(LTV_STEPS - 1, Math.floor((fReal > 0 ? fReal : fPlan) * LTV_STEPS)));
       const head = (pts, j) => { const a = pts[Math.max(0, j - 1)], b = pts[j]; return Math.atan2(-(b[1] - a[1]), b[0] - a[0]); };
       const upTo = (pts, f) => pts.slice(0, Math.max(2, Math.round(f * (pts.length - 1)) + 1));
 

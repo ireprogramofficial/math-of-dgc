@@ -53,31 +53,3 @@ describe('drift fits', () => {
   }
 });
 
-describe('fit 4: rank-one LTV (DGC-style)', async () => {
-  const { fitRankOneLTV, planLTV, rolloutLTV, thrustMatrix } = await import('../src/control/rankOneLTV.js');
-  const ltv = fitRankOneLTV(data.series, SERIES.every);
-  const B = thrustMatrix(new BoatModel(flow), SERIES.every);
-
-  it('is centered on the samples\' average, and each A[k] maps x[k] exactly onto x[k+1]', () => {
-    const n = data.series.length;
-    expect(ltv.pbar[0]).toBeCloseTo(data.series.reduce((s, p) => s + p[0], 0) / n, 9);
-    expect(ltv.steps).toBe(n - 1);
-    const replay = rolloutLTV(ltv, B, data.series[0], new Float64Array(NU * ltv.steps), ltv.steps);
-    for (let i = 0; i < n; i++) expect(Math.hypot(replay[i][0] - data.series[i][0], replay[i][1] - data.series[i][1])).toBeLessThan(1e-6);
-  });
-
-  it('its plan is (nearly) exact in the model but misses badly on the actual drift', () => {
-    const K = Math.round(500 / SERIES.every), start = data.series[0], target = data.single;
-    const plan = planLTV(ltv, B, start, target, K);
-    expect(plan.plannedMiss).toBeLessThan(5);
-    for (const v of plan.U) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThanOrEqual(1); }
-    const boat = new LiveBoat(new BoatModel(flow)), u = new Float64Array(NU);
-    boat.x.set(start);
-    for (let k = 0; k < K; k++) { for (let c = 0; c < NU; c++) u[c] = plan.U[NU * k + c]; for (let j = 0; j < 56; j++) boat.step(u, 0.5); }
-    expect(Math.hypot(boat.x[0] - target[0], boat.x[1] - target[1])).toBeGreaterThan(100);
-  });
-
-  it('refuses a horizon longer than the data', () => {
-    expect(() => planLTV(ltv, B, data.series[0], data.single, ltv.steps + 1)).toThrow();
-  });
-});

@@ -6,10 +6,9 @@
 //   fit 2  one linear model  x' = A x + b, extrapolated everywhere (as DGC does with its A[k])
 //   fit 3  a quadratic polynomial drift (12 parameters): a better match to the data, extrapolating very differently
 import { FlowField } from '../river/flowfield.js';
-import { fitRankOneLTV, ltvDrift } from './rankOneLTV.js';
 
 /** Display names of the fitting methods (shared by both slides). */
-export const FIT_METHODS = { fit1: 'Moving average', fit2: 'Linear regression', fit3: 'Quadratic regression', fit4: 'Rank-one updates (DGC-style)' };
+export const FIT_METHODS = { fit1: 'Moving average', fit2: 'Linear regression', fit3: 'Quadratic regression' };
 
 export const SERIES = { count: 26, every: 28, from: -40 }; // samples, seconds apart, start offset (m) below the fixed point
 const JITTER = 3;            // meters of measurement noise
@@ -168,11 +167,5 @@ export function makeDriftData(flow, scn) {
   const single = jitter([[cT[0] + 30, cT[1] + 22]], JITTER)[0];
   return {
     series, single, basinInitial: bInitial, basinTarget: bTarget, fits: buildFits(flow, series, SERIES.every),
-    ltv: fitRankOneLTV(series, SERIES.every), // fit 4: time-varying, so it is a sequence of fields (see ltvFields)
   };
-}
-
-/** Fit 4 as one displayable field per time step k: the drift (A[k] - I)(x - x_bar) / dt (clipped like the other fits). */
-export function ltvFields(actual, ltv) {
-  return ltv.A.map((_, k) => fieldFrom(actual, (x, y, o) => ltvDrift(ltv, k, x, y, o)));
 }
